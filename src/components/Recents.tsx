@@ -1,8 +1,10 @@
-import { IonText } from "@ionic/react"
+import { IonList, IonTitle } from "@ionic/react"
 
 const Recents: React.FC = () => {
   return (
-    <IonText>Hello World!</IonText>
+    <IonList>
+      <IonTitle>My Memories</IonTitle>
+    </IonList>
   )
 }
 

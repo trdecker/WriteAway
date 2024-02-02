@@ -22,6 +22,7 @@ import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
+import NewNote from './pages/NewNote';
 
 setupIonicReact();
 
@@ -36,6 +37,9 @@ const App: React.FC = () => (
         {/* Home page */}
         <Route exact path="/home">
           <Home />
+        </Route>
+        <Route exact path="/newnote">
+          <NewNote />
         </Route>
         {/* Login page */}
         <Route exact path="/login">

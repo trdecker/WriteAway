@@ -1,0 +1,30 @@
+ion-button[shape=cirlce] {
+  --border-radius: 50%;
+  width: 45px;
+  height: 45px;
+}
+
+#header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 12px 48px 12px 48px;
+}
+
+#row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+#roundButton {
+  --border-radius: 50%;
+  width: 45px;
+  height: 45px;
+}
+
+#footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
