@@ -1,0 +1,22 @@
+#content {
+    padding: 20px;
+}
+
+#logo {
+    width: 80%;
+    display: flex;
+    justify-content: center;
+}
+
+.IonRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+IonRow {
+    display: flex;
+    align-items: center;
+}
+
