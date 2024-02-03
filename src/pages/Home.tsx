@@ -1,11 +1,32 @@
-import { IonPage, IonContent, IonHeader, IonTabBar, IonTabButton, IonTabs, IonIcon, IonToolbar, IonButton, IonDatetime, IonTitle, IonList, IonListHeader, IonRow, IonCol, IonRouterOutlet } from '@ionic/react';
-import { add, menu, pencil, search } from 'ionicons/icons';
+import { IonPage, IonContent, IonHeader, IonIcon, IonButton, IonDatetime, IonRow, IonCol } from '@ionic/react';
+import { add, menu, search } from 'ionicons/icons';
 import './Home.css';
-import { IonReactRouter } from '@ionic/react-router';
 import Recents from '../components/Recents';
-import { Route } from 'react-router';
+import { useEffect, useState } from 'react';
+import sampleEntries from '../../public/assets/sampleEntries.json'
+import { Entrie } from '../types/Types.d';
+
 
 const Home: React.FC = () => {
+
+  const [entries, setEntries] = useState<Entrie[]>()
+
+  // Retrieve notes
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        // const userId = await AsyncStorage.getItem('userId')
+        // const result = await setNotes (result.notes)
+        console.log(sampleEntries)
+        setEntries(sampleEntries)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+    
+    fetchData()
+  }, [])
+
   const addNote = () => {
     console.log('addnote clicked')
   }
@@ -32,10 +53,11 @@ const Home: React.FC = () => {
         <div id="row">
           <IonDatetime presentation="date"/>
         </div>
+
         {/* Recents */}
         <IonRow id="row">
           <IonCol size="4">
-            <Recents />
+            <Recents entries="entries" />
           </IonCol>
         </IonRow>
         
