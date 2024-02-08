@@ -1,27 +1,81 @@
-import { IonButton, IonCol, IonContent, IonImg, IonInput, IonPage, IonRow} from "@ionic/react"
+/**
+ * @file Login.tsx
+ * @description The landing page of the application. Users may sign up or login into their account.
+ * @author Tad Decker
+ * 
+ * 2/5/2024
+ */
+
+import { InputChangeEventDetail, IonButton, IonCol, IonContent, IonImg, IonInput, IonPage, IonRow, useIonLoading} from "@ionic/react"
 import './Login.css'
-import { useState } from "react";
+import { useState } from 'react'
+import { login, signup } from '../../src/api/UsersApi'
+import { store } from "../../config"
+import { useHistory } from "react-router"
 
 const Login: React.FC = () => {
 	const [username, setUsername] = useState('')
 	const [password, setPassword] = useState('')
 
-	const changeUsername = (ev: Event) => {
-		const val = (ev.target as HTMLIonInputElement).value as string
-		setUsername(val)
+	const history = useHistory()
+	const [presentLoading, dismissLoading] = useIonLoading()
+
+	const changeUsername = (ev: CustomEvent<InputChangeEventDetail>) => {
+		const target = ev.target as HTMLIonInputElement | null
+
+		if (target) {
+			const val = target.value as string
+			setUsername(val)
+		}
 	}
 
-	const changePassword = (ev: Event) => {
-		const val = (ev.target as HTMLIonInputElement).value as string
-		setPassword(val)
+	const changePassword = (ev: CustomEvent<InputChangeEventDetail>) => {
+		const target = ev.target as HTMLIonInputElement | null
+
+		if (target) {
+			const val = target.value as string
+			setPassword(val)
+		}
 	}
 
-	const handleLogin = () => {
-		console.log(username, password)
+	const handleLogin = async () => {
+		try {
+			await presentLoading()
+			const response = await login(username, password)
+			if (response) {
+				await store.set('username', response.username)
+				await store.set('userId', response.userId)
+				await store.set('authToken', response.token)
+	
+				history.push("/home")
+			} else {
+				// TODO: "Incorrect password" alert
+			}
+		} catch (e) {
+			console.error('Error logging in.', e)
+		} finally {
+			await dismissLoading()
+		}
 	}
 
-	const handleSignup = () => {
-		console.log(username, password)
+	const handleSignup = async () => {
+		try {
+			await presentLoading()
+			const response = await signup(username, password)
+			if (response) {
+				await store.set('username', response.username)
+				await store.set('userId', response.userId)
+				await store.set('authToken', response.token)
+	
+				history.push("/home")
+			} else {
+				// TODO: "Incorrect password" alert
+			}
+		} catch (e) {
+			console.error(e)
+		} finally {
+			await dismissLoading()
+		}
 	}
 
 	return (
@@ -63,6 +117,7 @@ const Login: React.FC = () => {
 							<IonButton onClick={handleSignup}>Signup</IonButton>
 						</IonCol>
 					</IonRow>
+					{/* Loading overlay */}
 				</IonContent>
 			</IonPage>
 	);

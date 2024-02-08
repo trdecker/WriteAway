@@ -1,8 +1,17 @@
+/**
+ * @file App.tsx
+ * @description Router to specific pages, import of import packages
+ * @author Tad Decker
+ * 
+ * 2/1/2024
+ */
+
 import { Redirect, Route } from 'react-router-dom';
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import NewNote from './pages/NewNote';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -22,7 +31,6 @@ import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
-import NewNote from './pages/NewNote';
 
 setupIonicReact();
 
@@ -32,7 +40,7 @@ const App: React.FC = () => (
       <IonRouterOutlet>
         {/* Root (Redirects to login screen) */}
         <Route exact path="/">
-          <Redirect to="/home" />
+          <Redirect to="/login" />
         </Route>
         {/* Home page */}
         <Route exact path="/home">

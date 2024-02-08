@@ -1,17 +1,25 @@
-import { IonList, IonText, IonTitle } from "@ionic/react"
-import { Entrie } from "../types/Types.d"
+import { InputChangeEventDetail, IonItem, IonLabel, IonList, IonText, IonTitle } from "@ionic/react"
+import { Entry } from "../types/Types.d"
 
-const Recents: React.FC<Entrie[]> = (entries: Entrie[]) => {
+const Recents: React.FC<{ entries: Entry[]}> = ({ entries }) => {
+
+  const handleSelectNote = (entry: Entry) => {
+    console.log(entry)
+  }
 
   return (
     <IonList lines="inset">
       <IonTitle>My Memories</IonTitle>
-      
+      {entries.map((entry, index) => (
+              <IonItem onClick={() => handleSelectNote(entry)}>
+                <IonLabel>{entry.body}</IonLabel>
+              </IonItem>
+            ))}
     </IonList>
   )
 }
 
-type listitemparams ={
+type listitemparams = {
   value: string,
   function: Function
 }
