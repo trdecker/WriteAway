@@ -78,6 +78,17 @@ const Login: React.FC = () => {
 		}
 	}
 
+	/**
+	 * FIXME: handle login if the enter key is pressed
+	 * @param ev
+	 */
+	const handleKeyUp = (ev: any) => {
+		// console.log(ev)
+		// if (event?.key === 'Enter') {
+		// 	handleLogin()
+		// }
+	}
+
 	return (
 			<IonPage>	
 				<IonContent id="content">
@@ -111,16 +122,16 @@ const Login: React.FC = () => {
 					{/* Login/signup buttons */}
 					<IonRow class="IonRow">
 						<IonCol>
-							<IonButton onClick={handleLogin}>Login</IonButton>
+							<IonButton onClick={handleLogin} onKeyUp={handleKeyUp}>Login</IonButton>
 						</IonCol>
 						<IonCol>
-							<IonButton onClick={handleSignup}>Signup</IonButton>
+							<IonButton onClick={handleSignup} onKeyUp={handleKeyUp}>Signup</IonButton>
 						</IonCol>
 					</IonRow>
 					{/* Loading overlay */}
 				</IonContent>
 			</IonPage>
-	);
-};
+	)
+}
 
-export default Login;
+export default Login

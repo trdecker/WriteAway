@@ -1,18 +1,39 @@
 import { InputChangeEventDetail, IonButton, IonContent, IonHeader, IonIcon, IonPage, IonTextarea, useIonLoading } from "@ionic/react"
 import { arrowBack, menu, pencil } from "ionicons/icons"
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { store } from '../../config'
-import { createEntry } from '../api/NotesApi'
+import { createEntry, updateEntry } from '../api/NotesApi'
 import { Entry } from '../types/Types.d'
 import { useHistory } from 'react-router'
-
+import { useAppContext } from '../contexts/AppContext'
 
 const NewNote: React.FC = () => {
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
+  const [entryId, setEntryId] = useState('')
   const [presentLoading, dismissLoading] = useIonLoading()
+  
+  const { reload } = useAppContext()
 
   const history = useHistory()
+
+  useEffect(() => {
+      async function getCurrEntry() {
+        try {
+          const currEntry = await store.get('currEntry')
+          if (currEntry) {
+            setTitle(currEntry.title)
+            setBody(currEntry.body)
+            setEntryId(currEntry.id)
+          }
+        } catch (e) {
+          console.error(e)
+        } finally {
+        }
+      }
+
+      getCurrEntry()
+  }, [])
 
   const changeTitle = (ev: CustomEvent<InputChangeEventDetail>) => {
 		const target = ev.target as HTMLIonInputElement | null
@@ -33,6 +54,9 @@ const NewNote: React.FC = () => {
 	}
 
   const handleBackButton = async () => {
+    await store.set('editMode', false) // Set back to false
+    await store.set('currEntry', null)
+    reload()
     history.push('/home')
   }
 
@@ -40,14 +64,21 @@ const NewNote: React.FC = () => {
     try {
       await presentLoading()
       const userId = await store.get("userId")
-      const newEntry: Entry = {
+      const entry: Entry = {
         userId,
         title,
         body,
         date: new Date().toString()
       }
-      console.log(newEntry)
-      await createEntry(userId,newEntry)
+      // If editting an existing entry, update the entry. Else, create a new entry.
+      const editMode = await store.get('editMode')
+      if (editMode) {
+        await updateEntry(userId, entry, entryId)
+      } else {
+        await createEntry(userId, entry)
+        await store.set('editMode', true)
+        await store.set('currEntry', entry)
+      }
       // history.push('/home')
     } catch (e) {
       console.error("Error making note", e)
@@ -67,9 +98,9 @@ const NewNote: React.FC = () => {
           <IonButton id="roundButton"><IonIcon icon={menu} /></IonButton>
         </IonHeader>
         {/* Title */}
-        <IonTextarea onIonInput={changeTitle}/>
+        <IonTextarea value={title} onIonInput={changeTitle}/>
         {/* Body */}
-        <IonTextarea onIonInput={changeBody}/>
+        <IonTextarea value={body} onIonInput={changeBody}/>
 
         {/* Add note button */}
         <div id="footer">

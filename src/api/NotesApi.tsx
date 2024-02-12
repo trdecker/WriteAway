@@ -39,15 +39,15 @@ export async function getEntries(userId: String) {
 
 /**
  * @param {String} userId
- * @param {Entry} item
+ * @param {Entry} entry
  * @returns the response if success; else null
  */
-export async function createEntry(userId: String, item: Entry) {
+export async function createEntry(userId: String, entry: Entry) {
   try {
     const authToken = await store.get('authToken')
     const path = `${isDev ? corsProxyUrl : ''}${url}/notes?userId=${encodeURIComponent(userId as string)}`
 
-    const response = await axios.post(path, item, {
+    const response = await axios.post(path, entry, {
       headers: {
         'Authorization': `Bearer ${authToken}`
       }
@@ -61,16 +61,17 @@ export async function createEntry(userId: String, item: Entry) {
 
 /**
  * @param {String} userId
- * @param {String} item
+ * @param {Entry} entry
+ * @param {String} entryId
  * @returns the response if success; else null
  */
-export async function updateEntry(userId: String, item: String) {
+export async function updateEntry(userId: String, entry: Entry, entryId: String) {
   try {
-    const itemToMake = { userId: userId, ...item }
-    const authToken = store.get('authToken')
+    const entryToUpdate = { id: entryId, ...entry }
+    const authToken = await store.get('authToken')
     const path =  `${isDev ? corsProxyUrl : ''}${url}/notes?userId=${encodeURIComponent(userId as string)}`
 
-    const response = await axios.put(path, itemToMake, {
+    const response = await axios.put(path, entryToUpdate, {
       headers: {
         'Authorization': `Bearer ${authToken}`
       }
