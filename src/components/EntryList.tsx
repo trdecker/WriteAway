@@ -1,20 +1,17 @@
-import { IonItem, IonLabel, IonList, IonText, IonTitle } from '@ionic/react'
+/**
+ * @description Entry list componenent. Display list of entries, and emit event when one is clicked.
+ * @param entries Entry[]
+ * @param select (entry: Entry) => void
+ * @author Tad Decker
+ * 
+ * 2-6-2024
+ */
+
+
+import { IonItem, IonLabel, IonList, IonText } from '@ionic/react'
 import { Entry } from '../types/Types.d'
-import { useHistory } from 'react-router'
-import { store } from '../../config'
-import { useAppContext } from '../contexts/AppContext'
 
-const EntryList: React.FC<{ entries: Entry[]}> = ({ entries }) => {
-
-  const { reload } = useAppContext()
-
-  const history = useHistory()
-  const handleSelectNote = async (entry: Entry) => {
-    await store.set('editMode', true)
-    await store.set('currEntry', entry)
-    reload()
-    history.push('/entry')
-  }
+const EntryList: React.FC<{ entries: Entry[], select: (entry: Entry) => void }> = ({ entries, select: emitSelect }) => {
 
   // const displayDate: string = (date: string) => {
   //   return new Date(date).toISOString
@@ -23,7 +20,7 @@ const EntryList: React.FC<{ entries: Entry[]}> = ({ entries }) => {
   return (
     <IonList lines="inset">
       {entries.map((entry) => (
-              <IonItem key={entry.id} onClick={() => handleSelectNote(entry)}>
+              <IonItem key={entry.id} onClick={() => emitSelect(entry)}>
                 <IonLabel>{entry.title}</IonLabel>
                 <IonText>{entry.body}</IonText>
               </IonItem>

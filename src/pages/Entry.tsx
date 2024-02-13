@@ -1,18 +1,20 @@
 import { InputChangeEventDetail, IonButton, IonContent, IonHeader, IonIcon, IonPage, IonTextarea, useIonLoading } from "@ionic/react"
 import { arrowBack, menu, pencil } from "ionicons/icons"
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { store } from '../../config'
 import { createEntry, updateEntry } from '../api/NotesApi'
 import { Entry } from '../types/Types.d'
 import { useHistory } from 'react-router'
 import { useAppContext } from '../contexts/AppContext'
+import RichText from "../components/RichText"
 
 const NewNote: React.FC = () => {
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [entryId, setEntryId] = useState('')
   const [presentLoading, dismissLoading] = useIonLoading()
-  
+
+
   const { reload } = useAppContext()
 
   const history = useHistory()
@@ -101,6 +103,9 @@ const NewNote: React.FC = () => {
         <IonTextarea value={title} onIonInput={changeTitle}/>
         {/* Body */}
         <IonTextarea value={body} onIonInput={changeBody}/>
+
+        {/* Rich Text Editor */}
+        <RichText />
 
         {/* Add note button */}
         <div id="footer">

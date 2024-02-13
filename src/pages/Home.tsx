@@ -1,3 +1,10 @@
+/**
+ * @description List of recent notes, calendar to select date, settings menu, search button, and new note button.
+ * @author Tad Decker
+ * 
+ * 2-6-2024
+ */
+
 import { IonPage, IonContent, IonHeader, IonIcon, IonButton, IonDatetime, IonRow, IonCol, IonMenu, IonToolbar, IonTitle, IonText, IonInput } from '@ionic/react'
 import { add, menu, search } from 'ionicons/icons'
 import './Home.css'
@@ -50,7 +57,7 @@ const Home: React.FC = () => {
   }
 
   /**
-   * Update search results if search value changes
+   * @description Update search results if search value changes
    */
   useEffect(() => {
     const tempSearchResult = entries?.filter((entry) => {
@@ -70,20 +77,20 @@ const Home: React.FC = () => {
     history.push('/entry')
   }
 
-  const handleOpenMenu = async () => {
-    await menuController.open('mainMenu')
-  }
-
-  const handleSearchButton = async () => {
-    await menuController.open('searchMenu')
-  }
-
   const handleSignOut = async () => {
     await store.set('username', '')
     await store.set('userId', '')
     await store.set('authToken', '')
-    await menuController.close('mainMenu  ')
+    await menuController.close('mainMenu')
     history.push('/login')
+  }
+
+  const handleSelectEntry = async (entry: any) => {
+    await store.set('editMode', true)
+    await store.set('currEntry', entry)
+    reload()
+    menuController.close('searchMenu')
+    history.push('/entry')
   }
 
   return (
@@ -104,12 +111,12 @@ const Home: React.FC = () => {
       <IonMenu menuId="searchMenu" side="end" contentId="main-content">
         <IonHeader>
           <IonToolbar>
-            <IonTitle>Menu Content</IonTitle>
+            <IonTitle>Search entries</IonTitle>
           </IonToolbar>
         </IonHeader>
         <IonContent className="ion-padding">
           <IonInput fill="outline" onIonInput={changeSearchValue}></IonInput>
-          <EntryList entries={searchResult}></EntryList>
+          <EntryList entries={searchResult} select={handleSelectEntry}></EntryList>
         </IonContent>
       </IonMenu>
 
@@ -117,11 +124,11 @@ const Home: React.FC = () => {
       <IonPage id="main-content">
         {/* Header */}
         <IonHeader>
-          <IonToolbar>
-          {/* Settings Button */}
-          <IonButton id="roundButton" onClick={handleOpenMenu}><IonIcon icon={menu} /></IonButton>
-          {/* Search Button */}
-          <IonButton id="roundButton" onClick={handleSearchButton}><IonIcon icon={search} /></IonButton>
+          <IonToolbar id="header">
+            {/* Settings Button */}
+            <IonButton slot="start" id="roundButton" onClick={() => menuController.open('mainMenu')}><IonIcon icon={menu} /></IonButton>
+            {/* Search Button */}
+            <IonButton slot="end" id="roundButton" onClick={() => menuController.open('searchMenu')}><IonIcon icon={search} /></IonButton>
           </IonToolbar>
         </IonHeader>
         {/* Content */}
@@ -136,7 +143,7 @@ const Home: React.FC = () => {
             <IonCol>
               <IonTitle>Recents</IonTitle>
               {/* TODO: Make this pick the most recent 5 */}
-              <EntryList entries={entries?.slice(0, 5) ?? []} /> 
+              <EntryList entries={entries?.slice(0, 5) ?? []} select={handleSelectEntry} /> 
             </IonCol>
           </IonRow>
           

@@ -2,6 +2,7 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
 import { Storage } from '@ionic/storage'
+import './global.scss'
 
 const store = new Storage()
 store.create()
