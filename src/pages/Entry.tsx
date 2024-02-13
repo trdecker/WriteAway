@@ -6,7 +6,8 @@ import { createEntry, updateEntry } from '../api/NotesApi'
 import { Entry } from '../types/Types.d'
 import { useHistory } from 'react-router'
 import { useAppContext } from '../contexts/AppContext'
-import RichText from "../components/RichText"
+import ReactQuill from 'react-quill'
+import 'react-quill/dist/quill.snow.css'
 
 const NewNote: React.FC = () => {
   const [title, setTitle] = useState('')
@@ -101,11 +102,8 @@ const NewNote: React.FC = () => {
         </IonHeader>
         {/* Title */}
         <IonTextarea value={title} onIonInput={changeTitle}/>
-        {/* Body */}
-        <IonTextarea value={body} onIonInput={changeBody}/>
-
-        {/* Rich Text Editor */}
-        <RichText />
+        {/* Body rich text editor */}
+        <ReactQuill theme="snow" value={body} onChange={setBody} />
 
         {/* Add note button */}
         <div id="footer">
