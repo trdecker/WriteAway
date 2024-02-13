@@ -46,7 +46,7 @@ const Login: React.FC = () => {
 				await store.set('username', response.username)
 				await store.set('userId', response.userId)
 				await store.set('authToken', response.token)
-	
+
 				history.push("/home")
 			} else {
 				// TODO: "Incorrect password" alert
@@ -77,9 +77,10 @@ const Login: React.FC = () => {
 			await dismissLoading()
 		}
 	}
-
+	
 	/**
 	 * FIXME: handle login if the enter key is pressed
+	 * FIXME: Get rid of 'any' type
 	 * @param ev
 	 */
 	const handleKeyUp = (ev: any) => {

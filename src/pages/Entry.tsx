@@ -33,7 +33,7 @@ const NewNote: React.FC = () => {
       }
 
       getCurrEntry()
-  }, [])
+  }, [reload])
 
   const changeTitle = (ev: CustomEvent<InputChangeEventDetail>) => {
 		const target = ev.target as HTMLIonInputElement | null

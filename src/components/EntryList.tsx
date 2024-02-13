@@ -2,13 +2,17 @@ import { IonItem, IonLabel, IonList, IonText, IonTitle } from '@ionic/react'
 import { Entry } from '../types/Types.d'
 import { useHistory } from 'react-router'
 import { store } from '../../config'
+import { useAppContext } from '../contexts/AppContext'
 
 const EntryList: React.FC<{ entries: Entry[]}> = ({ entries }) => {
+
+  const { reload } = useAppContext()
 
   const history = useHistory()
   const handleSelectNote = async (entry: Entry) => {
     await store.set('editMode', true)
     await store.set('currEntry', entry)
+    reload()
     history.push('/entry')
   }
 

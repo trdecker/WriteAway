@@ -18,11 +18,12 @@ const Home: React.FC = () => {
 
   const history = useHistory()
 
-  // Retrieve notes
+  /**
+   * Retrieve notes
+   */
   useEffect(() => {
     async function fetchData() {
       try {
-        console.log('in fetch Data')
         const userId = await store.get("userId")
         if (userId) {
           const entries = await getEntries(userId)
@@ -37,7 +38,7 @@ const Home: React.FC = () => {
     }
 
     fetchData()
-  }, [reload]) // Is this right?
+  }, [reload]) // How does this work?
 
   const changeSearchValue = async (ev: Event) => {
     const target = ev.target as HTMLIonInputElement | null
@@ -45,23 +46,27 @@ const Home: React.FC = () => {
 		if (target) {
 			const val = target.value as string
       setSearchValue(val)
-      console.log('searchValue:', val)
 		}
   }
 
+  /**
+   * Update search results if search value changes
+   */
   useEffect(() => {
     const tempSearchResult = entries?.filter((entry) => {
-      console.log(entry)
-      entry.body.toLowerCase().includes(searchValue.toLowerCase()) ||
-      entry.title.toLowerCase().includes(searchValue.toLowerCase())
-      // TODO: Be able to search by date (check for month, day, etc)
+      return (
+        entry.body.toLowerCase().includes(searchValue.toLowerCase()) ||
+        entry.title.toLowerCase().includes(searchValue.toLowerCase())
+        // TODO: Be able to search by date (check for month, day, etc)
+      )
     }) ?? []
-    setSearchResult(searchValue.trim() === '' ? entries : tempSearchResult)
-    console.log(tempSearchResult)
+    setSearchResult(searchValue.trim() === '' ? [] : tempSearchResult)
+  
   }, [searchValue])
 
-  const handleAddNote = async () => {
+  const handleAddEntry = async () => {
     await store.set('editMode', false)
+    reload()
     history.push('/entry')
   }
 
@@ -71,6 +76,14 @@ const Home: React.FC = () => {
 
   const handleSearchButton = async () => {
     await menuController.open('searchMenu')
+  }
+
+  const handleSignOut = async () => {
+    await store.set('username', '')
+    await store.set('userId', '')
+    await store.set('authToken', '')
+    await menuController.close('mainMenu  ')
+    history.push('/login')
   }
 
   return (
@@ -83,9 +96,7 @@ const Home: React.FC = () => {
           </IonToolbar>
         </IonHeader>
         <IonContent className="ion-padding">
-          <IonText>Example stuff</IonText>
-          <IonText>Color scheme</IonText>
-          <IonText>Sign out</IonText>
+          <IonButton onClick={handleSignOut}>Sign out</IonButton>
         </IonContent>
       </IonMenu>
 
@@ -131,8 +142,7 @@ const Home: React.FC = () => {
           
           {/* Add note button */}
           <div id="footer">
-            <IonButton id="roundButton" onClick={handleAddNote}><IonIcon size="large" icon={add}/></IonButton>
-            <IonButton onClick={() => console.log(reload)}>TEST</IonButton>
+            <IonButton id="roundButton" onClick={handleAddEntry}><IonIcon size="large" icon={add}/></IonButton>
           </div>
         </IonContent>
       </IonPage>
