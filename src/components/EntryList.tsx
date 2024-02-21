@@ -18,7 +18,6 @@ const EntryList: React.FC<{ entries: Entry[], select: (entry: Entry) => void }> 
     const stringDate: string = date ? new Date(date).toLocaleDateString() : 'N/A'
 
     return stringDate
-    return date
   }
 
   function displayBody(body: string): string {
