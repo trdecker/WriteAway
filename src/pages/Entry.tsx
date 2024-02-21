@@ -1,15 +1,20 @@
 import { InputChangeEventDetail, IonButton, IonContent, IonHeader, IonIcon, IonPage, IonTextarea, useIonLoading } from "@ionic/react"
-import { arrowBack, menu, pencil } from "ionicons/icons"
-import { useEffect, useRef, useState } from 'react'
+import { arrowBack, camera, menu, pencil } from "ionicons/icons"
+import { useEffect, useState } from 'react'
 import { store } from '../../config'
 import { createEntry, updateEntry } from '../api/NotesApi'
 import { Entry } from '../types/Types.d'
 import { useHistory } from 'react-router'
+import { usePhotoGallery, UserPhoto } from '../hooks/usePhotoGallery'
 import { useAppContext } from '../contexts/AppContext'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
 
 const NewNote: React.FC = () => {
+  
+  const { photos, takePhoto } = usePhotoGallery()
+  const [photoToDelete, setPhotoToDelete] = useState<UserPhoto>();
+
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [entryId, setEntryId] = useState('')
@@ -90,6 +95,14 @@ const NewNote: React.FC = () => {
     }
   }
 
+  const handleTakePhoto = () => {
+    takePhoto()
+  }
+
+  const handleRecordAudio = () => {
+
+  }
+
   return (
     <IonPage>
       {/* Content */}
@@ -104,6 +117,8 @@ const NewNote: React.FC = () => {
         <IonTextarea value={title} onIonInput={changeTitle}/>
         {/* Body rich text editor */}
         <ReactQuill theme="snow" value={body} onChange={setBody} />
+
+        <IonButton id="roundButton" onClick={handleTakePhoto}><IonIcon icon={camera} /></IonButton>
 
         {/* Add note button */}
         <div id="footer">

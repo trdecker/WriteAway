@@ -47,6 +47,10 @@ const Home: React.FC = () => {
     fetchData()
   }, [reload]) // How does this work?
 
+  /**
+   * Change search value. Called when the associated ionInput is typed into.
+   * @param ev Event
+   */
   const changeSearchValue = async (ev: Event) => {
     const target = ev.target as HTMLIonInputElement | null
 
@@ -63,13 +67,50 @@ const Home: React.FC = () => {
     const tempSearchResult = entries?.filter((entry) => {
       return (
         entry.body.toLowerCase().includes(searchValue.toLowerCase()) ||
-        entry.title.toLowerCase().includes(searchValue.toLowerCase())
-        // TODO: Be able to search by date (check for month, day, etc)
+        entry.title.toLowerCase().includes(searchValue.toLowerCase()) ||
+        searchDates(entry.date, searchValue.toLowerCase())
       )
     }) ?? []
     setSearchResult(searchValue.trim() === '' ? [] : tempSearchResult)
   
   }, [searchValue])
+
+  /**
+   * FIXME: Finish this!
+   * @param dateString 
+   * @param searchValue 
+   * @returns boolean
+   */
+  function searchDates(dateString: string, searchValue: string): boolean {
+    // Check if empty
+    if (!dateString || !searchValue)
+      return false
+
+    const date = new Date(dateString)
+
+    // Check date string formats
+    if (date?.toISOString()?.toLowerCase().includes(searchValue) ?? false)
+      return true
+    else if (date.toLocaleDateString('en-US', { weekday: 'long', month: 'long' })?.toLowerCase().includes(searchValue) ?? false)
+      return true
+    else if (date.toLocaleString()?.toLowerCase().includes(searchValue) ?? false)
+      return true
+    else if (date.toString()?.toLowerCase().includes(searchValue) ?? false)
+      return true
+    else if (date.toUTCString()?.toLowerCase().includes(searchValue) ?? false)
+      return true
+    else if (date.toLocaleTimeString()?.toLowerCase().includes(searchValue) ?? false)
+      return true
+
+    return false
+  }
+
+  function dateChecks(dateString: string, searchValue: string): boolean {
+    // Check for numerical dates
+    if (dateString.includes(searchValue))
+      return true
+    return false
+  }
 
   const handleAddEntry = async () => {
     await store.set('editMode', false)
@@ -85,7 +126,7 @@ const Home: React.FC = () => {
     history.push('/login')
   }
 
-  const handleSelectEntry = async (entry: any) => {
+  const handleSelectEntry = async (entry: Entry) => {
     await store.set('editMode', true)
     await store.set('currEntry', entry)
     reload()
@@ -94,7 +135,7 @@ const Home: React.FC = () => {
   }
 
   return (
-    <>
+    <IonContent scrollY={false}>
       {/* Menu */}
       <IonMenu menuId="mainMenu" contentId="main-content">
         <IonHeader>
@@ -142,7 +183,6 @@ const Home: React.FC = () => {
           <IonRow id="row">
             <IonCol>
               <IonTitle>Recents</IonTitle>
-              {/* TODO: Make this pick the most recent 5 */}
               <EntryList entries={entries?.slice(0, 5) ?? []} select={handleSelectEntry} /> 
             </IonCol>
           </IonRow>
@@ -153,7 +193,7 @@ const Home: React.FC = () => {
           </div>
         </IonContent>
       </IonPage>
-    </>
+    </IonContent>
   )
 }
 
