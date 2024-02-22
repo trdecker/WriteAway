@@ -9,7 +9,7 @@ import { IonPage, IonContent, IonHeader, IonIcon, IonButton, IonDatetime, IonRow
 import { add, menu, search } from 'ionicons/icons'
 import './Home.css'
 import { useEffect, useState } from 'react'
-import { Entry } from '../types/Types.d'
+import { Entry, Mood } from '../types/Types.d'
 import { getEntries } from '../api/NotesApi'
 import { useHistory } from 'react-router'
 import { menuController } from '@ionic/core/components'
@@ -51,7 +51,7 @@ const Home: React.FC = () => {
    * Change search value. Called when the associated ionInput is typed into.
    * @param ev Event
    */
-  const changeSearchValue = async (ev: Event) => {
+  const handleChangeSearchValue = async (ev: Event) => {
     const target = ev.target as HTMLIonInputElement | null
 
 		if (target) {
@@ -64,19 +64,21 @@ const Home: React.FC = () => {
    * @description Update search results if search value changes
    */
   useEffect(() => {
-    const tempSearchResult = entries?.filter((entry) => {
+    const searchEntries = entries?.filter((entry) => {
+      console.log(entry)
       return (
         entry.body.toLowerCase().includes(searchValue.toLowerCase()) ||
         entry.title.toLowerCase().includes(searchValue.toLowerCase()) ||
-        searchDates(entry.date, searchValue.toLowerCase())
+        searchDates(entry.date, searchValue.toLowerCase()) ||
+        entry?.moods?.some(mood => mood.toLowerCase().includes(searchValue.toLowerCase())) ||
+        entry?.tags?.some(tag => tag.toLowerCase().includes(searchValue.toLowerCase()))
       )
     }) ?? []
-    setSearchResult(searchValue.trim() === '' ? [] : tempSearchResult)
+    setSearchResult(searchValue.trim() === '' ? [] : searchEntries)
   
   }, [searchValue])
 
   /**
-   * FIXME: Finish this!
    * @param dateString 
    * @param searchValue 
    * @returns boolean
@@ -134,6 +136,13 @@ const Home: React.FC = () => {
     history.push('/entry')
   }
 
+  const compareByDate = (a: Entry, b: Entry) => {
+    const dateA = new Date(a.date)
+    const dateB = new Date(b.date)
+
+    return dateB.getTime() - dateA.getTime()
+  }
+
   return (
     <IonContent scrollY={false}>
       {/* Menu */}
@@ -156,7 +165,7 @@ const Home: React.FC = () => {
           </IonToolbar>
         </IonHeader>
         <IonContent className="ion-padding">
-          <IonInput fill="outline" onIonInput={changeSearchValue}></IonInput>
+          <IonInput fill="outline" onIonInput={handleChangeSearchValue}></IonInput>
           <EntryList entries={searchResult} select={handleSelectEntry}></EntryList>
         </IonContent>
       </IonMenu>
@@ -183,7 +192,7 @@ const Home: React.FC = () => {
           <IonRow id="row">
             <IonCol>
               <IonTitle>Recents</IonTitle>
-              <EntryList entries={entries?.slice(0, 5) ?? []} select={handleSelectEntry} /> 
+              <EntryList entries={entries?.sort(compareByDate).slice(0, 5) ?? []} select={handleSelectEntry} /> 
             </IonCol>
           </IonRow>
           

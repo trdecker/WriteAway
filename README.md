@@ -1,5 +1,5 @@
 # WriteAway
-A sample journalling app written in React Ionic
+A sample journalling app written in React Ionic.
 
 ## Application features
 
@@ -10,8 +10,8 @@ A sample journalling app written in React Ionic
 
 ### Home page
 * List of recent entries ✔
-  - Clickable
-  - Searchable
+  - Clickable ✔
+  - Searchable ✔
 * Previous entries are editable ✔
 * Button to create a new journal entry ✔
 ### Entry page
@@ -20,7 +20,7 @@ A sample journalling app written in React Ionic
 * Audio clips
 * Images
 * Journal entry can have tags
-* Journal entry can have mood
+* Journal entry can have mood ✔
 ### Stretch goals
 * Integrate with calendar
 * Push notifications

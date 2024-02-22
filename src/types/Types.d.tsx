@@ -1,6 +1,6 @@
 import { InputChangeEventDetail } from "@ionic/react";
 
-export enum Moods {
+export enum Mood {
   SAD = 'sad',
   HAPPY = 'happy',
   ANGRY = 'angry',
@@ -17,7 +17,20 @@ export type Entry = {
   body: string,
   date: string,
   tags: string[],
-  moods: Moods[] // Which are strings
+  moods: Mood[] // Which are strings
+}
+
+// 
+// 
+/**
+ * This is how items in the "tags" selector in Entry.tsx will appear.
+ * Eventually I'd like the user to be able to add new tags, which is why they
+ * need an id (so the list can have a unqiue identifier in case of duplicates)
+ * @deprecated
+ */
+export type TagItem = {
+  name: string,
+  id: number
 }
 
 export interface InputCustomEvent extends CustomEvent {

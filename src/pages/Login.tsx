@@ -91,8 +91,8 @@ const Login: React.FC = () => {
 	}
 
 	return (
-			<IonPage>	
-				<IonContent id="content">
+			<IonPage id="page">	
+				<IonContent>
 					<IonRow class="IonRow">
 						<IonImg id="logo" src="../../public/assets/logo1.png" alt="WriteAway logo" ></IonImg>
 					</IonRow>
@@ -100,6 +100,7 @@ const Login: React.FC = () => {
 					<IonRow class="IonRow">
 						<IonCol>
 							<IonInput 
+								id="IonInput"
 								label="Username:"
 								autocapitalize="none"
 								security="true"

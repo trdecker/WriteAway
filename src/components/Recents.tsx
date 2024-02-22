@@ -1,3 +1,7 @@
+/**
+ * @deprecated
+ */
+
 import { InputChangeEventDetail, IonItem, IonLabel, IonList, IonText, IonTitle } from "@ionic/react"
 import { Entry } from "../types/Types.d"
 

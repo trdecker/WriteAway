@@ -65,8 +65,10 @@ export async function createEntry(userId: String, entry: Entry) {
  * @param {String} entryId
  * @returns the response if success; else null
  */
-export async function updateEntry(userId: String, entry: Entry, entryId: String) {
+export async function updateEntry(userId: String, entry: Entry, entryId: number | undefined) {
   try {
+    if (!entry)
+      throw ("No entryId")
     const entryToUpdate = { id: entryId, ...entry }
     const authToken = await store.get('authToken')
     const path =  `${isDev ? corsProxyUrl : ''}${url}/notes?userId=${encodeURIComponent(userId as string)}`
@@ -85,12 +87,15 @@ export async function updateEntry(userId: String, entry: Entry, entryId: String)
 
 /**
  * @param {String} userId
- * @param {Entry} item
+ * @param {String} itemId
  * @returns the response if success; else null
  */
-export async function deleteEntry(userId: String, item: Entry) { 
+export async function deleteEntry(userId: String, itemId: String) { 
   try {
-    const path = `${isDev ? corsProxyUrl : ''}${url}/notes?userId=${encodeURIComponent(userId as string)}&noteId=${item.id}`
+    if (!itemId)
+      throw ('No item to delete')
+  
+    const path = `${isDev ? corsProxyUrl : ''}${url}/notes?userId=${encodeURIComponent(userId as string)}&noteId=${itemId}`
     const authToken = store.get('authToken')
 
     const response = await axios.delete(path, {
