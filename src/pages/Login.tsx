@@ -122,11 +122,11 @@ const Login: React.FC = () => {
 						</IonCol>
 					</IonRow>
 					{/* Login/signup buttons */}
-					<IonRow class="IonRow">
-						<IonCol>
+					<IonRow>
+						<IonCol class="ButtonCol">
 							<IonButton onClick={handleLogin} onKeyUp={handleKeyUp}>Login</IonButton>
 						</IonCol>
-						<IonCol>
+						<IonCol class="ButtonCol">
 							<IonButton onClick={handleSignup} onKeyUp={handleKeyUp}>Signup</IonButton>
 						</IonCol>
 					</IonRow>

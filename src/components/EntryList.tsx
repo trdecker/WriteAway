@@ -11,8 +11,9 @@
 import { IonItem, IonLabel, IonList, IonText } from '@ionic/react'
 import { stripHtml } from 'string-strip-html'
 import { Entry } from '../types/Types.d'
+import './EntryList.css'
 
-const EntryList: React.FC<{ entries: Entry[], select: (entry: Entry) => void }> = ({ entries, select: emitSelect }) => {
+const EntryList: React.FC<{ entries: Entry[], id?: string, select: (entry: Entry) => void }> = ({ entries, id, select: emitSelect }) => {
 
   function displayDate (date: string): string {
     const stringDate: string = date ? new Date(date).toLocaleDateString() : 'N/A'
@@ -28,14 +29,14 @@ const EntryList: React.FC<{ entries: Entry[], select: (entry: Entry) => void }> 
   }
 
   return (
-    <IonList lines="inset">
+    <IonList lines="inset" id={id}>
       {entries.map((entry) => (
-              <IonItem key={entry.id} onClick={() => emitSelect(entry)}>
-                <IonLabel>{entry.title}</IonLabel>
-                <IonLabel>{displayDate(entry.date)}</IonLabel>
-                <IonLabel>{displayBody(entry.body)}</IonLabel>
-              </IonItem>
-            ))}
+        <IonItem id="Item" key={entry.id} onClick={() => emitSelect(entry)}>
+          <IonLabel id="Text">{entry.title}</IonLabel>
+          <IonLabel id="Text">{displayDate(entry.date)}</IonLabel>
+          <IonLabel id="Text">{displayBody(entry.body)}</IonLabel>
+        </IonItem>))
+      }
     </IonList>
   )
 }

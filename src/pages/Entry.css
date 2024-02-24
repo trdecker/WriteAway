@@ -1,0 +1,39 @@
+#entryPage {
+  margin: 20px 20px;
+}
+
+#header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0;
+}
+
+#title {
+  font-size: x-large;
+  font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  margin-bottom: 0;
+
+  /* HOw can I remove the unneccessary padding in the IonInput?*/
+  --padding-end: 0px;
+  --inner-padding-end: 0px;
+
+  margin: 12px 12px 8px 4px;
+}
+
+
+#selector {
+  margin-bottom: 20px
+}
+
+#body {
+  height: 40%;
+  margin-bottom: 52px;
+  /* overflow: auto; */
+}
+
+#footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}

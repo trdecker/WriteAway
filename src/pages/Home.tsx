@@ -166,15 +166,15 @@ const Home: React.FC = () => {
         </IonHeader>
         <IonContent className="ion-padding">
           <IonInput fill="outline" onIonInput={handleChangeSearchValue}></IonInput>
-          <EntryList entries={searchResult} select={handleSelectEntry}></EntryList>
+          <EntryList id="entrylist" entries={searchResult} select={handleSelectEntry}></EntryList>
         </IonContent>
       </IonMenu>
 
       {/* Page */}
       <IonPage id="main-content">
         {/* Header */}
-        <IonHeader>
-          <IonToolbar id="header">
+        <IonHeader id="header">
+          <IonToolbar>
             {/* Settings Button */}
             <IonButton slot="start" id="roundButton" onClick={() => menuController.open('mainMenu')}><IonIcon icon={menu} /></IonButton>
             {/* Search Button */}
@@ -189,10 +189,10 @@ const Home: React.FC = () => {
           </div>
 
           {/* Recents */}
-          <IonRow id="row">
+          <IonRow>
             <IonCol>
               <IonTitle>Recents</IonTitle>
-              <EntryList entries={entries?.sort(compareByDate).slice(0, 5) ?? []} select={handleSelectEntry} /> 
+              <EntryList id="entry-list" entries={entries?.sort(compareByDate).slice(0, 5) ?? []} select={handleSelectEntry} /> 
             </IonCol>
           </IonRow>
           

@@ -1,11 +1,15 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import App from './App'
 import { Storage } from '@ionic/storage'
+import { defineCustomElements } from '@ionic/pwa-elements/loader'
+import App from './App'
 import './global.scss'
 
 const store = new Storage()
 store.create()
+
+// Call the element loader before the render call
+defineCustomElements(window);
 
 /**
  * FIXME: Somehow this should trigger when the "back" arrow is pressed.

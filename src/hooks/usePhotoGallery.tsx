@@ -3,7 +3,7 @@ import { isPlatform } from '@ionic/react'
 import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera'
 import { Filesystem, Directory } from '@capacitor/filesystem'
 import { Preferences } from '@capacitor/preferences'
-// import { Capacitor } from '@capacitor/core'
+import { Capacitor } from '@capacitor/core'
 
 export interface UserPhoto {
     filepath: string
@@ -106,21 +106,6 @@ export function usePhotoGallery() {
       // Preferences.set({ key: PHOTO_STORAGE, value: JSON.stringify(newPhotos) })
     }
 
-    /**
-     * The useEffect hook, by default, gets called each time a 
-     * component renders, unless, we pass in a dependency array. 
-     * In that case, it will only run when a dependency gets 
-     * updated. In our case we only want it to be called once. 
-     * By passing in an empty array, which will not be changed, 
-     * we can prevent the hook from being called multiple times.
-     * 
-     * The first parameter to useEffect is the function that will 
-     * be called by the effect. We pass in an anonymous arrow 
-     * function, and inside of it we define another asynchronous 
-     * method and then immediately call this. We have to call the 
-     * async function from within the hook __as the hook callback 
-     * can't be asynchronous itself.__
-     */
     useEffect(() => {
         const loadSaved = async () => {
           const { value } = await Preferences.get({ key: PHOTO_STORAGE })
@@ -143,17 +128,6 @@ export function usePhotoGallery() {
     }, [])
 
     return {
-        /**
-         * FROM TUTORIAL:
-         * Notice the magic here: there's no
-         *  platform-specific code (web, iOS, 
-         * or Android)! The Capacitor Camera 
-         * plugin abstracts that away for us, 
-         * leaving just one method call
-         * - getPhoto() - that will open up the
-         *  device's camera and allow us to 
-         * take photos.
-         */
         takePhoto,
         // deletePhoto,
         photos
