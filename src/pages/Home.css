@@ -32,4 +32,5 @@ ion-button[shape=cirlce] {
   display: flex;
   flex-direction: row;
   justify-content: center;
+  padding-top: 32px
 }

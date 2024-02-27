@@ -5,7 +5,7 @@
  * 2-6-2024
  */
 
-import { IonPage, IonContent, IonHeader, IonIcon, IonButton, IonDatetime, IonRow, IonCol, IonMenu, IonToolbar, IonTitle, IonText, IonInput } from '@ionic/react'
+import { IonPage, IonContent, IonHeader, IonIcon, IonButton, IonDatetime, IonRow, IonCol, IonMenu, IonToolbar, IonTitle, IonText, IonInput, IonFab, IonFabButton } from '@ionic/react'
 import { add, menu, search } from 'ionicons/icons'
 import './Home.css'
 import { useEffect, useState } from 'react'
@@ -195,11 +195,18 @@ const Home: React.FC = () => {
               <EntryList id="entry-list" entries={entries?.sort(compareByDate).slice(0, 5) ?? []} select={handleSelectEntry} /> 
             </IonCol>
           </IonRow>
-          
+
           {/* Add note button */}
-          <div id="footer">
-            <IonButton id="roundButton" onClick={handleAddEntry}><IonIcon size="large" icon={add}/></IonButton>
-          </div>
+          <IonRow>
+            <IonCol id="footer">
+              <IonFab>
+                <IonFabButton id="roundButton" onClick={handleAddEntry}>
+                <IonIcon size="large" icon={add}/>
+                </IonFabButton>
+              </IonFab>
+            </IonCol>
+          </IonRow>
+          
         </IonContent>
       </IonPage>
     </IonContent>

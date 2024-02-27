@@ -6,8 +6,8 @@
  * 2-6-2024
  */
 
-import { InputChangeEventDetail, IonButton, IonCol, IonContent, IonHeader, IonIcon, IonInput, IonPage, IonPopover, IonRow, IonSelect, IonSelectOption, IonTextarea, useIonLoading } from "@ionic/react"
-import { arrowBack, camera, menu, mic, save, stop, trash } from "ionicons/icons"
+import { InputChangeEventDetail, IonActionSheet, IonAlert, IonButton, IonCol, IonContent, IonHeader, IonIcon, IonImg, IonPage, IonRow, IonSelect, IonSelectOption, IonTextarea, useIonLoading } from "@ionic/react"
+import { arrowBack, camera, close, menu, mic, pause, play, save, trash } from "ionicons/icons"
 import { useEffect, useState } from 'react'
 import { store } from '../../config'
 import { createEntry, deleteEntry, updateEntry } from '../api/NotesApi'
@@ -18,12 +18,17 @@ import { VoiceRecorder, VoiceRecorderPlugin, RecordingData, GenericResponse, Cur
 import { useAppContext } from '../contexts/AppContext'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
-import { generateId } from "../utils/common"
 
 import './Entry.css'
+import ReactAudioPlayer from "react-audio-player"
+import AudioRecorder from "../components/AudioRecorder"
 
 const NewNote: React.FC = () => {
-  const { photos, takePhoto } = usePhotoGallery()
+  const { photos, takePhoto, deletePhoto } = usePhotoGallery()
+  const [photoToDelete, setPhotoToDelete] = useState<UserPhoto>()
+
+  const [recordings, setRecordings] = useState<string[]>([])
+  const [isRecording, setIsRecording] = useState(false)
 
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
@@ -35,6 +40,8 @@ const NewNote: React.FC = () => {
   const [userTags, setUserTags] = useState<string[]>([])
   const [newTag, setNewTag] = useState<string | undefined>(undefined)
   const [isEditMode, setIsEditMode] = useState(false)
+
+  const [markedDelete, setMarkedDelete] = useState(false)
 
   const { reload } = useAppContext()
 
@@ -134,7 +141,7 @@ const NewNote: React.FC = () => {
       if (isEditMode) {
         await updateEntry(userId, entry, entryId)
       } else {
-        await createEntry(userId, entry)
+        await createEntry(userId, entry, photos)
         await store.set('editMode', true)
         await store.set('currEntry', entry)
       }
@@ -197,39 +204,8 @@ const NewNote: React.FC = () => {
     takePhoto()
   }
 
-  /**
-   * 
-   */
-  const handleRecordAudio = async () => {
-    await VoiceRecorder.requestAudioRecordingPermission()
-  
-    if (await VoiceRecorder.hasAudioRecordingPermission()) {      
-      const status = (await VoiceRecorder.getCurrentStatus()).status
-      console.log(status)
-      if (status == 'NONE') {
-        console.log('Start recording!')
-        presentLoading()
-        await VoiceRecorder.startRecording()
-        dismissLoading()
-      }    
-
-      else if (status == 'RECORDING') {
-        console.log('...stopping...')
-        presentLoading()
-        await VoiceRecorder.stopRecording()
-        dismissLoading()
-      }
-      else if (status == 'PAUSED') {
-
-      }
-    }
-  }
-
-  const getRecordingIcon = async () => {
-    let icon = mic
-    const recordingStatus = (await VoiceRecorder.getCurrentStatus()).status
-    // if (recordingStatus == 
-    
+  const handleRecordAudio= () => {
+    setIsRecording(true)
   }
 
   return (
@@ -254,6 +230,7 @@ const NewNote: React.FC = () => {
           fill="outline"
           />
 
+        {/* Tags and Moods */}
         <IonRow>
           {/* Tags */}  
           <IonCol>
@@ -292,12 +269,37 @@ const NewNote: React.FC = () => {
           </IonCol>
         </IonRow>
 
-        {/* Out of scope? Would be cool... */}
-        {/* <IonButton id="click-trigger" fill="clear" size="small">New Tag</IonButton>
-        <IonPopover trigger="click-trigger" triggerAction="click">
-          <IonInput label="New Tag" onIonChange={changeNewTag} />
-          <IonButton id="roundButon" onClick={handleSaveTag}><IonIcon icon={add}></IonIcon></IonButton>
-        </IonPopover> */}
+        {/* New tag button */}
+        <IonButton id="new-tag" fill="clear" size="small">New Tag</IonButton>
+        <IonAlert
+          trigger="new-tag"
+          header="Create new tag"
+          buttons={['Cancel','OK']}
+          inputs={[
+            {
+              placeholder: 'My new tag'
+            },
+          ]}
+        />
+
+        {/* Images */}
+        <IonRow>
+          {/* Images */}
+          {
+            photos.length > 0 ? 
+            photos.map((photo, index) => (
+              <IonCol size="6" key={index}>
+                <IonImg onClick={() => setPhotoToDelete(photo)} src={photo.webviewPath} />
+              </IonCol>
+            )) : ''
+          }
+        </IonRow>
+
+        {/* Audio recordings */}
+        {
+          recordings.map(recording => 
+            <ReactAudioPlayer src="" controls />)
+        }
 
         {/* Body rich text editor */}
         <ReactQuill 
@@ -312,16 +314,68 @@ const NewNote: React.FC = () => {
         <div id="footer">
           <IonButton id="roundButton" onClick={handleTakePhoto}><IonIcon icon={camera} /></IonButton>
           <IonButton id="roundButton" onClick={handleRecordAudio}><IonIcon icon={mic} /></IonButton>
-          <IonButton id="roundButton" onClick={() => VoiceRecorder.stopRecording()}><IonIcon icon={stop} /></IonButton>
+          {/* <IonButton id="roundButton" onClick={() => VoiceRecorder.stopRecording()}><IonIcon icon={stop} /></IonButton> */}
           {/* <IonButton id="roundButton"><IonIcon size="large" icon={pencil}/></IonButton> */}
           <IonButton id="roundButton" onClick={handleSaveEntry}><IonIcon icon={save} /></IonButton>
+
           {/* TODO: make this disappear if NOT editting an item! */}
           {isEditMode ?
-            <IonButton  id="roundButton" onClick={handleDeleteEntry} color="danger">
+            <IonButton  id="roundButton" onClick={() => setMarkedDelete(true)} color="danger">
               <IonIcon icon={trash} size="large" />
             </IonButton>
             : null}
         </div>
+        {/* Delete photo confirmation message */}
+        <IonActionSheet
+          isOpen={!!photoToDelete}
+          buttons={[
+            {
+              text: 'Delete',
+              role: 'destructive',
+              icon: trash,
+              handler: () => {
+                if (photoToDelete) {
+                  deletePhoto(photoToDelete);
+                  setPhotoToDelete(undefined);
+                }
+              },
+            },
+            {
+              text: 'Cancel',
+              icon: close,
+              role: 'cancel', // What does "role" mean?
+            },
+          ]}
+          onDidDismiss={() => setPhotoToDelete(undefined)}
+        />
+
+        {/* Delete entry confirmation message */}
+        <IonActionSheet
+          isOpen={markedDelete}
+          buttons={[
+            {
+              text: 'Are you sure you want to delete this entry?',
+              role: 'destructive',
+              icon: trash,
+              handler: async () => {
+                const userId = await store.get('userId')
+                if (entryId && userId) {
+                  deleteEntry(userId, entryId.toString())
+                }
+              },
+            },
+            {
+              text: 'Cancel',
+              icon: close,
+              role: 'cancel'
+            },
+          ]}
+          onDidDismiss={() => setMarkedDelete(false)}
+        />
+
+        <IonActionSheet
+          
+        />
       </IonContent>
     </IonPage>
   )
