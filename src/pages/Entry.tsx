@@ -6,15 +6,14 @@
  * 2-6-2024
  */
 
-import { InputChangeEventDetail, IonActionSheet, IonAlert, IonButton, IonCol, IonContent, IonHeader, IonIcon, IonImg, IonPage, IonRow, IonSelect, IonSelectOption, IonTextarea, useIonLoading } from "@ionic/react"
+import { InputChangeEventDetail, IonActionSheet, IonAlert, IonButton, IonCard, IonCol, IonContent, IonFabButton, IonHeader, IonIcon, IonImg, IonModal, IonPage, IonRow, IonSelect, IonSelectOption, IonTextarea, useIonLoading } from "@ionic/react"
 import { arrowBack, camera, close, menu, mic, pause, play, save, trash } from "ionicons/icons"
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { store } from '../../config'
 import { createEntry, deleteEntry, updateEntry } from '../api/NotesApi'
 import { Entry, Mood, TagItem } from '../types/Types.d'
 import { useHistory } from 'react-router'
 import { usePhotoGallery, UserPhoto } from '../hooks/usePhotoGallery'
-import { VoiceRecorder, VoiceRecorderPlugin, RecordingData, GenericResponse, CurrentRecordingStatus } from 'capacitor-voice-recorder';
 import { useAppContext } from '../contexts/AppContext'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
@@ -27,8 +26,9 @@ const NewNote: React.FC = () => {
   const { photos, takePhoto, deletePhoto } = usePhotoGallery()
   const [photoToDelete, setPhotoToDelete] = useState<UserPhoto>()
 
-  const [recordings, setRecordings] = useState<string[]>([])
+  const [recordings, setRecordings] = useState<HTMLAudioElement[]>([])
   const [isRecording, setIsRecording] = useState(false)
+  const recordingModal = useRef<HTMLIonModalElement>(null)
 
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
@@ -204,7 +204,7 @@ const NewNote: React.FC = () => {
     takePhoto()
   }
 
-  const handleRecordAudio= () => {
+  const handleRecordAudio = () => {
     setIsRecording(true)
   }
 
@@ -270,7 +270,7 @@ const NewNote: React.FC = () => {
         </IonRow>
 
         {/* New tag button */}
-        <IonButton id="new-tag" fill="clear" size="small">New Tag</IonButton>
+        {/* <IonButton id="new-tag" fill="clear" size="small">New Tag</IonButton>
         <IonAlert
           trigger="new-tag"
           header="Create new tag"
@@ -280,7 +280,7 @@ const NewNote: React.FC = () => {
               placeholder: 'My new tag'
             },
           ]}
-        />
+        /> */}
 
         {/* Images */}
         <IonRow>
@@ -296,9 +296,22 @@ const NewNote: React.FC = () => {
         </IonRow>
 
         {/* Audio recordings */}
-        {
-          recordings.map(recording => 
-            <ReactAudioPlayer src="" controls />)
+        {recordings.map(recording => 
+            <IonRow key={recording.src}>
+              <ReactAudioPlayer src={recording.src} controls />
+              <IonFabButton 
+                // When selected, remove delete the recording.
+                // How do I get this to run faster?
+                // TODO: Make this less icky
+                onClick={() => {
+                  const index = recordings.findIndex((val) => val.src === recording.src )
+                  console.log('yep')
+                  recordings.splice(index, 1)
+                }}>
+                <IonIcon icon={trash} />
+              </IonFabButton>
+            </IonRow>
+            )
         }
 
         {/* Body rich text editor */}
@@ -312,17 +325,17 @@ const NewNote: React.FC = () => {
         {/* Buttons */}
         {/* TODO: pretty up and TODO: functionality :) */}
         <div id="footer">
-          <IonButton id="roundButton" onClick={handleTakePhoto}><IonIcon icon={camera} /></IonButton>
-          <IonButton id="roundButton" onClick={handleRecordAudio}><IonIcon icon={mic} /></IonButton>
+          <IonFabButton onClick={handleTakePhoto}><IonIcon icon={camera} /></IonFabButton>
+          <IonFabButton id="recordButton" onClick={handleRecordAudio}><IonIcon icon={mic} /></IonFabButton>
           {/* <IonButton id="roundButton" onClick={() => VoiceRecorder.stopRecording()}><IonIcon icon={stop} /></IonButton> */}
           {/* <IonButton id="roundButton"><IonIcon size="large" icon={pencil}/></IonButton> */}
-          <IonButton id="roundButton" onClick={handleSaveEntry}><IonIcon icon={save} /></IonButton>
+          <IonFabButton onClick={handleSaveEntry}><IonIcon icon={save} /></IonFabButton>
 
           {/* TODO: make this disappear if NOT editting an item! */}
           {isEditMode ?
-            <IonButton  id="roundButton" onClick={() => setMarkedDelete(true)} color="danger">
+            <IonFabButton onClick={() => setMarkedDelete(true)} color="danger">
               <IonIcon icon={trash} size="large" />
-            </IonButton>
+            </IonFabButton>
             : null}
         </div>
         {/* Delete photo confirmation message */}
@@ -373,9 +386,28 @@ const NewNote: React.FC = () => {
           onDidDismiss={() => setMarkedDelete(false)}
         />
 
-        <IonActionSheet
-          
-        />
+        <IonModal
+          id="recording-modal"
+          ref={recordingModal}
+          isOpen={isRecording}
+          // onWillDismiss={(ev) => onWill(ev)}
+          initialBreakpoint={0.95}
+          onDidDismiss={() => setIsRecording(false)}
+        >
+          <IonContent>
+            <IonCard>
+              <AudioRecorder 
+                // Close the modal
+                cancel={() => setIsRecording(false)} 
+                // Add the recording to recordings, and close the modal
+                save={(recording: HTMLAudioElement) => {
+                  setRecordings([...recordings, recording])
+                  setIsRecording(false)
+                }}
+              />
+            </IonCard>
+          </IonContent>
+        </IonModal>
       </IonContent>
     </IonPage>
   )
