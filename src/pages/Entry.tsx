@@ -127,13 +127,10 @@ const NewNote: React.FC = () => {
 
   const handleSaveEntry = async () => {
     try {
-      console.log(photos)
       await presentLoading()
       const userId = await store.get("userId")
 
       // Get a list of upload photos in the right format
-      // FIXME: May be able to do this in usePhotoGaller.tsx
-      console.log(photos)
 
       const entry: Entry = {
         userId,
@@ -187,33 +184,6 @@ const NewNote: React.FC = () => {
     } catch (e) {
       console.error(e)
     }
-  }
-
-  const handleDeleteEntry = async () => {
-    try {
-      presentLoading()
-      const userId = await store.get("userId")
-      if (entryId) {
-        await deleteEntry(userId, entryId.toString())
-        handleBackButton()
-      }
-    } catch (e) {
-      console.error(e)
-    } finally {
-      dismissLoading()
-    }
-  }
-
-  /**
-   * Prompts permission to take the photo, then accesses the camera.
-   * TODO: Photo will save as part of the entry.
-   */
-  const handleTakePhoto = () => {
-    takePhoto()
-  }
-
-  const handleRecordAudio = () => {
-    setIsRecording(true)
   }
 
   return (
@@ -333,13 +303,10 @@ const NewNote: React.FC = () => {
         {/* Buttons */}
         {/* TODO: pretty up and TODO: functionality :) */}
         <div id="footer">
-          <IonFabButton onClick={handleTakePhoto}><IonIcon icon={camera} /></IonFabButton>
-          <IonFabButton id="recordButton" onClick={handleRecordAudio}><IonIcon icon={mic} /></IonFabButton>
-          {/* <IonButton id="roundButton" onClick={() => VoiceRecorder.stopRecording()}><IonIcon icon={stop} /></IonButton> */}
-          {/* <IonButton id="roundButton"><IonIcon size="large" icon={pencil}/></IonButton> */}
+          <IonFabButton onClick={() => takePhoto()}><IonIcon icon={camera} /></IonFabButton>
+          <IonFabButton id="recordButton" onClick={() => setIsRecording(true)}><IonIcon icon={mic} /></IonFabButton>
           <IonFabButton onClick={handleSaveEntry}><IonIcon icon={save} /></IonFabButton>
 
-          {/* TODO: make this disappear if NOT editting an item! */}
           {isEditMode ?
             <IonFabButton onClick={() => setMarkedDelete(true)} color="danger">
               <IonIcon icon={trash} size="large" />
@@ -380,8 +347,12 @@ const NewNote: React.FC = () => {
               icon: trash,
               handler: async () => {
                 const userId = await store.get('userId')
+                console.log(userId, entryId)
                 if (entryId && userId) {
-                  deleteEntry(userId, entryId.toString())
+                  presentLoading()
+                  await deleteEntry(userId, entryId.toString())
+                  await handleBackButton()
+                  dismissLoading()
                 }
               },
             },
