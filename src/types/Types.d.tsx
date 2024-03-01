@@ -1,4 +1,5 @@
-import { InputChangeEventDetail } from "@ionic/react";
+import { InputChangeEventDetail } from "@ionic/react"
+import { UserPhoto } from "../hooks/usePhotoGallery"
 
 export enum Mood {
   SAD = 'sad',
@@ -17,7 +18,9 @@ export type Entry = {
   body: string,
   date: string,
   tags: string[],
-  moods: Mood[] // Which are strings
+  moods: Mood[], // Which are strings
+  images: UserPhoto[],
+  audio: any[]
 }
 
 // 

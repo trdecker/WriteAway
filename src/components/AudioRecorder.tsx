@@ -75,6 +75,12 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ cancel, save}) => {
     // dismissLoading()
   }
 
+  const handleCancel = async () => {
+    await VoiceRecorder.stopRecording()
+    setRecordingStatus('NONE')
+    cancel()
+  }
+
   return (
     <>
       <IonRow>
@@ -84,7 +90,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ cancel, save}) => {
           <IonButton onClick={handleStopRecording}><IonIcon icon={stop} /></IonButton> :
           null
         }
-        <IonButton onClick={() => cancel()} fill="clear">Cancel</IonButton>
+        <IonButton onClick={() => handleCancel()} fill="clear">Cancel</IonButton>
         {
           recording?.src ?
           <IonButton onClick={() => save(recording)}>Save</IonButton> :

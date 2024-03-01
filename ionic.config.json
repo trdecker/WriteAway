@@ -1,5 +1,6 @@
 {
   "name": "journal_app",
+  "typescript": true,
   "integrations": {
     "capacitor": {}
   },

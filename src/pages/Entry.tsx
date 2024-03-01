@@ -127,21 +127,29 @@ const NewNote: React.FC = () => {
 
   const handleSaveEntry = async () => {
     try {
+      console.log(photos)
       await presentLoading()
       const userId = await store.get("userId")
+
+      // Get a list of upload photos in the right format
+      // FIXME: May be able to do this in usePhotoGaller.tsx
+      console.log(photos)
+
       const entry: Entry = {
         userId,
         title,
         body,
         date: new Date().toString(),
         tags: selectedTags,
-        moods: selectedMoods
+        moods: selectedMoods,
+        images: photos,
+        audio: recordings
       }
       // If editting an existing entry, update the entry. Else, create a new entry.
       if (isEditMode) {
         await updateEntry(userId, entry, entryId)
       } else {
-        await createEntry(userId, entry, photos)
+        await createEntry(userId, entry)
         await store.set('editMode', true)
         await store.set('currEntry', entry)
       }

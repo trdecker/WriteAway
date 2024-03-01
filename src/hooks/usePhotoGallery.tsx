@@ -8,6 +8,7 @@ import { Capacitor } from '@capacitor/core'
 export interface UserPhoto {
     filepath: string
     webviewPath?: string
+		base64String?: string
 }
 
 const PHOTO_STORAGE = 'photos'
@@ -50,8 +51,16 @@ export async function base64FromPath(path: string): Promise<String> {
 export function usePhotoGallery() {
 	const [photos, setPhotos] = useState<UserPhoto[]>([])
 
+	/**
+	 * Get the base64data from the photo, then save the photo the capacitor Filesystem.
+	 * @param photo {Photo}
+	 * @param fileName {string}
+	 * @returns newImage {UserPhoto}
+	 */
 	const savePicture = async (photo: Photo, fileName: string): Promise<UserPhoto> => {
 		let base64Data: string
+
+		// Get the base64Data
 		// "hybrid" will detect Cordova or Capacitor (usually means mobile, or at least NOT WEB)
 		if (isPlatform('hybrid')) {
 			const file = await Filesystem.readFile({
@@ -62,26 +71,30 @@ export function usePhotoGallery() {
 			// This will occur if the application is running on the web.
 			base64Data = await base64FromPath(photo.webPath!) as string // This may display a type error. It will still run.
 		}
+
 		const savedFile = await Filesystem.writeFile({
 			path: fileName,
 			data: base64Data, // This may also display a type error.
 			directory: Directory.Data
 		})
 
-		// Display the new image
+		// Display and return the new image
 		if (isPlatform('hybrid')) {
 			// Dislay new image by rewriting the 'file://' path to HTTP
 			// Details: https://ionicframework.com/docs/building/webview#file-protocol
 			return {
 				filepath: savedFile.uri,
-				webviewPath: Capacitor.convertFileSrc(savedFile.uri)
+				webviewPath: Capacitor.convertFileSrc(savedFile.uri),
+				base64String: base64Data
 			}
-		} else {
+		} 
+		else {
 			// Use webPath to display new image instead of base64 since it's
 			// already loaded into memory
 			return {
 				filepath: fileName,
-				webviewPath: photo.webPath
+				webviewPath: photo.webPath,
+				base64String: base64Data
 			}
 		}
 	}
@@ -94,7 +107,7 @@ export function usePhotoGallery() {
 		Preferences.set({ key: PHOTO_STORAGE, value: JSON.stringify(newPhotos) })
 
 		// delete photo file from filesystem
-		const filename = photo.filepath.substr(photo.filepath.lastIndexOf('/') + 1)
+		const filename = photo.filepath.substring(photo.filepath.lastIndexOf('/') + 1)
 		await Filesystem.deleteFile({
 			path: filename,
 			directory: Directory.Data,
@@ -112,10 +125,10 @@ export function usePhotoGallery() {
 
 		const fileName = Date.now() + '.jpeg'
 		const savedFileImage = await savePicture(photo, fileName)
-		const newPhotos = [savedFileImage, ... photos]
+		const newPhotos = [savedFileImage, ...photos]
 		setPhotos(newPhotos)
 
-		// Will I need this?
+		// TODO: Will I need this?
 		// Preferences.set({ key: PHOTO_STORAGE, value: JSON.stringify(newPhotos) })
 	}
 
