@@ -230,7 +230,7 @@ const NewNote: React.FC = () => {
             {/* Moods */}
           <IonCol>
             <IonSelect 
-              value={selectedMoods} 
+              value={selectedMoods}
               label="Moods" 
               labelPlacement="floating" 
               interface="popover" 

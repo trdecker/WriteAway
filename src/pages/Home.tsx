@@ -5,25 +5,32 @@
  * 2-6-2024
  */
 
-import { IonPage, IonContent, IonHeader, IonIcon, IonButton, IonDatetime, IonRow, IonCol, IonMenu, IonToolbar, IonTitle, IonText, IonInput, IonFab, IonFabButton } from '@ionic/react'
-import { add, menu, search } from 'ionicons/icons'
-import './Home.css'
-import { useEffect, useState } from 'react'
-import { Entry, Mood } from '../types/Types.d'
-import { getEntries } from '../api/NotesApi'
-import { useHistory } from 'react-router'
+import { IonPage, IonContent, IonHeader, IonIcon, IonButton, IonDatetime, IonRow, IonCol, IonMenu, IonToolbar, IonTitle, IonInput, IonFab, IonFabButton, IonSelect, IonSelectOption } from '@ionic/react'
 import { menuController } from '@ionic/core/components'
-import EntryList from '../components/EntryList'
-import { store } from '../../config'
 import { useAppContext } from '../contexts/AppContext'
+import { add, menu, search } from 'ionicons/icons'
+import { Entry, Mood } from '../types/Types.d'
+import { useAuth0 } from '@auth0/auth0-react'
+import { getEntries } from '../api/NotesApi'
+import { useEffect, useState } from 'react'
+import { useHistory } from 'react-router'
+import { store } from '../../config'
+import LogoutButton from '../components/LogoutButton'
+import EntryList from '../components/EntryList'
+import './Home.css'
+import Profile from '../components/Profile'
 
 const Home: React.FC = () => {
   const [entries, setEntries] = useState<Entry[]>([])
   const [searchValue, setSearchValue] = useState<string>('')
   const [searchResult, setSearchResult] = useState<Entry[]>([])
+  const [selectedView, setSelectedView] = useState<string>('Recents')
+
   const { reload } = useAppContext()
 
   const history = useHistory()
+
+  const { user } = useAuth0()
 
   /**
    * Retrieve notes
@@ -31,9 +38,9 @@ const Home: React.FC = () => {
   useEffect(() => {
     async function fetchData() {
       try {
-        const userId = await store.get("userId")
-        if (userId) {
-          const entries = await getEntries(userId)
+        const username = user?.nickname
+        if (username) {
+          const entries = await getEntries(username)
 
           if (entries) {
             setEntries(entries)
@@ -107,13 +114,6 @@ const Home: React.FC = () => {
     return false
   }
 
-  function dateChecks(dateString: string, searchValue: string): boolean {
-    // Check for numerical dates
-    if (dateString.includes(searchValue))
-      return true
-    return false
-  }
-
   const handleAddEntry = async () => {
     await store.set('editMode', false)
     reload()
@@ -153,7 +153,9 @@ const Home: React.FC = () => {
           </IonToolbar>
         </IonHeader>
         <IonContent className="ion-padding">
-          <IonButton onClick={handleSignOut}>Sign out</IonButton>
+          <Profile />
+          {/* <IonButton onClick={handleSignOut}>Sign out</IonButton> */}
+          <LogoutButton />
         </IonContent>
       </IonMenu>
 
@@ -183,6 +185,22 @@ const Home: React.FC = () => {
         </IonHeader>
         {/* Content */}
         <IonContent fullscreen> 
+        {/* <IonRow>
+          <IonCol>
+            <IonSelect 
+              id="selector"
+              interface="popover"
+              value={selectedView}
+              defaultValue="Recents"
+            >
+              <IonSelectOption>Recents</IonSelectOption>
+              <IonSelectOption>By Date</IonSelectOption>
+              <IonSelectOption>By Tag</IonSelectOption>
+              <IonSelectOption>By Mood</IonSelectOption>
+            </IonSelect>
+          </IonCol>
+        </IonRow> */}
+
           {/* Calendar */}
           <div id="row">
             <IonDatetime presentation="date"/>

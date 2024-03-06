@@ -1,7 +1,9 @@
-import React from 'react'
+import React, { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Storage } from '@ionic/storage'
 import { defineCustomElements } from '@ionic/pwa-elements/loader'
+import { Auth0Provider } from '@auth0/auth0-react'
+import { domain, clientId, callbackUri } from '../auth.config'
 import App from './App'
 import './global.scss'
 
@@ -24,7 +26,17 @@ document.addEventListener('ionBackButton', (ev: any) => {
 const container = document.getElementById('root')
 const root = createRoot(container!)
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  <StrictMode>
+    <Auth0Provider
+      domain={domain}
+      clientId={clientId}
+      useRefreshTokens={true}
+      useRefreshTokensFallback={false}
+      authorizationParams={{
+        redirect_uri: callbackUri
+      }}
+    >
+      <App />
+    </Auth0Provider>
+  </StrictMode>
 )
