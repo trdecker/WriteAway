@@ -6,21 +6,22 @@
  * 2-6-2024
  */
 
-import { InputChangeEventDetail, IonActionSheet, IonAlert, IonButton, IonCard, IonCol, IonContent, IonFabButton, IonHeader, IonIcon, IonImg, IonModal, IonPage, IonRow, IonSelect, IonSelectOption, IonTextarea, useIonLoading } from "@ionic/react"
-import { arrowBack, camera, close, menu, mic, pause, play, save, trash } from "ionicons/icons"
-import { useEffect, useRef, useState } from 'react'
-import { store } from '../../config'
+import { InputChangeEventDetail, IonActionSheet, IonButton, IonCard, IonCol, IonContent, IonFabButton, IonHeader, IonIcon, IonImg, IonModal, IonPage, IonRow, IonSelect, IonSelectOption, IonTextarea, useIonLoading } from "@ionic/react"
+import { arrowBack, camera, close, menu, mic, save, trash } from "ionicons/icons"
 import { createEntry, deleteEntry, updateEntry } from '../api/NotesApi'
-import { Entry, Mood, TagItem } from '../types/Types.d'
-import { useHistory } from 'react-router'
 import { usePhotoGallery, UserPhoto } from '../hooks/usePhotoGallery'
+import { Entry, Mood, TagItem } from '../types/Types.d'
 import { useAppContext } from '../contexts/AppContext'
+import { useEffect, useRef, useState } from 'react'
+import { useHistory } from 'react-router'
+import { store } from '../../config'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
 
 import './Entry.css'
 import ReactAudioPlayer from "react-audio-player"
-import AudioRecorder from "../components/AudioRecorder"
+import AudioRecorder from "../components/entry/AudioRecorder"
+import { useAuth0 } from "@auth0/auth0-react"
 
 const NewNote: React.FC = () => {
   const { photos, takePhoto, deletePhoto } = usePhotoGallery()
@@ -42,6 +43,8 @@ const NewNote: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false)
 
   const [markedDelete, setMarkedDelete] = useState(false)
+
+  const { user } = useAuth0()
 
   const { reload } = useAppContext()
 
@@ -67,6 +70,7 @@ const NewNote: React.FC = () => {
           // Retrive the tag names the user has created
           const tags: TagItem[] = await store.get('tags')
           // setUserTags(tags ?? [])
+          // FIXME: This is hardcoded
           setUserTags([
             "School",
             "Dating",
@@ -128,29 +132,30 @@ const NewNote: React.FC = () => {
   const handleSaveEntry = async () => {
     try {
       await presentLoading()
-      const userId = await store.get("userId")
+      const userId = user?.nickname
 
       // Get a list of upload photos in the right format
 
-      const entry: Entry = {
-        userId,
-        title,
-        body,
-        date: new Date().toString(),
-        tags: selectedTags,
-        moods: selectedMoods,
-        images: photos,
-        audio: recordings
+      if (userId) {
+        const entry: Entry = {
+          userId,
+          title,
+          body,
+          date: new Date().toString(),
+          tags: selectedTags,
+          moods: selectedMoods,
+          images: photos,
+          audio: recordings
+        }
+        // If editting an existing entry, update the entry. Else, create a new entry.
+        if (isEditMode) {
+          await updateEntry(userId, entry, entryId)
+        } else {
+          await createEntry(userId, entry)
+          await store.set('editMode', true)
+          await store.set('currEntry', entry)
+        }
       }
-      // If editting an existing entry, update the entry. Else, create a new entry.
-      if (isEditMode) {
-        await updateEntry(userId, entry, entryId)
-      } else {
-        await createEntry(userId, entry)
-        await store.set('editMode', true)
-        await store.set('currEntry', entry)
-      }
-      // history.push('/home')
     } catch (e) {
       console.error("Error making note", e)
     } finally {

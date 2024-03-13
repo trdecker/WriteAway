@@ -16,28 +16,45 @@ import { useEffect, useState } from 'react'
 import { useHistory } from 'react-router'
 import { store } from '../../config'
 import LogoutButton from '../components/LogoutButton'
-import EntryList from '../components/EntryList'
+import EntryList from '../components/home/EntryList'
 import './Home.css'
-import Profile from '../components/Profile'
+import Profile from '../components/home/Profile'
+import SearchMenu from '../components/home/SearchMenu'
+import Calendar from '../components/home/Calendar'
+import Recents from '../components/home/Recents'
 
 const Home: React.FC = () => {
   const [entries, setEntries] = useState<Entry[]>([])
-  const [searchValue, setSearchValue] = useState<string>('')
-  const [searchResult, setSearchResult] = useState<Entry[]>([])
   const [selectedView, setSelectedView] = useState<string>('Recents')
+  const [selectedMood, setSelectedMood] = useState<Mood>()
+  const [selectedTag, setSelectedTag] = useState<string>('')
 
   const { reload } = useAppContext()
 
   const history = useHistory()
 
-  const { user } = useAuth0()
+  const { user, getAccessTokenSilently } = useAuth0()
+
+  // FIXME: This is hardcoded. 
+  const tags = [
+    "School",
+    "Dating",
+    "Church",
+    "Work",
+    "Family",
+    "Hobbies",
+    "Other"
+  ]
 
   /**
-   * Retrieve notes
+   * Retrieve entries!
    */
   useEffect(() => {
     async function fetchData() {
       try {
+        const token = await getAccessTokenSilently()
+        
+        await store.set('authToken', token)
         const username = user?.nickname
         if (username) {
           const entries = await getEntries(username)
@@ -54,78 +71,11 @@ const Home: React.FC = () => {
     fetchData()
   }, [reload]) // How does this work?
 
-  /**
-   * Change search value. Called when the associated ionInput is typed into.
-   * @param ev Event
-   */
-  const handleChangeSearchValue = async (ev: Event) => {
-    const target = ev.target as HTMLIonInputElement | null
-
-		if (target) {
-			const val = target.value as string
-      setSearchValue(val)
-		}
-  }
-
-  /**
-   * @description Update search results if search value changes
-   */
-  useEffect(() => {
-    const searchEntries = entries?.filter((entry) => {
-      console.log(entry)
-      return (
-        entry.body.toLowerCase().includes(searchValue.toLowerCase()) ||
-        entry.title.toLowerCase().includes(searchValue.toLowerCase()) ||
-        searchDates(entry.date, searchValue.toLowerCase()) ||
-        entry?.moods?.some(mood => mood.toLowerCase().includes(searchValue.toLowerCase())) ||
-        entry?.tags?.some(tag => tag.toLowerCase().includes(searchValue.toLowerCase()))
-      )
-    }) ?? []
-    setSearchResult(searchValue.trim() === '' ? [] : searchEntries)
-  
-  }, [searchValue])
-
-  /**
-   * @param dateString 
-   * @param searchValue 
-   * @returns boolean
-   */
-  function searchDates(dateString: string, searchValue: string): boolean {
-    // Check if empty
-    if (!dateString || !searchValue)
-      return false
-
-    const date = new Date(dateString)
-
-    // Check date string formats
-    if (date?.toISOString()?.toLowerCase().includes(searchValue) ?? false)
-      return true
-    else if (date.toLocaleDateString('en-US', { weekday: 'long', month: 'long' })?.toLowerCase().includes(searchValue) ?? false)
-      return true
-    else if (date.toLocaleString()?.toLowerCase().includes(searchValue) ?? false)
-      return true
-    else if (date.toString()?.toLowerCase().includes(searchValue) ?? false)
-      return true
-    else if (date.toUTCString()?.toLowerCase().includes(searchValue) ?? false)
-      return true
-    else if (date.toLocaleTimeString()?.toLowerCase().includes(searchValue) ?? false)
-      return true
-
-    return false
-  }
-
   const handleAddEntry = async () => {
     await store.set('editMode', false)
+    await store.set('currEntry', null)
     reload()
     history.push('/entry')
-  }
-
-  const handleSignOut = async () => {
-    await store.set('username', '')
-    await store.set('userId', '')
-    await store.set('authToken', '')
-    await menuController.close('mainMenu')
-    history.push('/login')
   }
 
   const handleSelectEntry = async (entry: Entry) => {
@@ -134,13 +84,6 @@ const Home: React.FC = () => {
     reload()
     menuController.close('searchMenu')
     history.push('/entry')
-  }
-
-  const compareByDate = (a: Entry, b: Entry) => {
-    const dateA = new Date(a.date)
-    const dateB = new Date(b.date)
-
-    return dateB.getTime() - dateA.getTime()
   }
 
   return (
@@ -152,9 +95,9 @@ const Home: React.FC = () => {
             <IonTitle>Settings</IonTitle>
           </IonToolbar>
         </IonHeader>
+        {/* User profile and logout button */}
         <IonContent className="ion-padding">
           <Profile />
-          {/* <IonButton onClick={handleSignOut}>Sign out</IonButton> */}
           <LogoutButton />
         </IonContent>
       </IonMenu>
@@ -167,8 +110,11 @@ const Home: React.FC = () => {
           </IonToolbar>
         </IonHeader>
         <IonContent className="ion-padding">
-          <IonInput fill="outline" onIonInput={handleChangeSearchValue}></IonInput>
-          <EntryList id="entrylist" entries={searchResult} select={handleSelectEntry}></EntryList>
+          {/* Text input and list of entries */}
+          <SearchMenu 
+            entries={entries} 
+            handleSelectEntry={(entry) => handleSelectEntry(entry)} 
+          />
         </IonContent>
       </IonMenu>
 
@@ -185,45 +131,96 @@ const Home: React.FC = () => {
         </IonHeader>
         {/* Content */}
         <IonContent fullscreen> 
-        {/* <IonRow>
+        <IonRow>
           <IonCol>
             <IonSelect 
               id="selector"
               interface="popover"
               value={selectedView}
-              defaultValue="Recents"
+              onIonChange={(val) => setSelectedView(val.detail.value)}
+              defaultValue="recents"
             >
-              <IonSelectOption>Recents</IonSelectOption>
-              <IonSelectOption>By Date</IonSelectOption>
-              <IonSelectOption>By Tag</IonSelectOption>
-              <IonSelectOption>By Mood</IonSelectOption>
+              <IonSelectOption value="recents">Recents</IonSelectOption>
+              <IonSelectOption value="date">By Date</IonSelectOption>
+              <IonSelectOption value="tag">By Tag</IonSelectOption>
+              <IonSelectOption value="mood">By Mood</IonSelectOption>
             </IonSelect>
           </IonCol>
-        </IonRow> */}
+        </IonRow>
 
-          {/* Calendar */}
-          <div id="row">
-            <IonDatetime presentation="date"/>
-          </div>
 
-          {/* Recents */}
+        {/* Recents */}
+        {
+          selectedView === 'recents' && 
           <IonRow>
             <IonCol>
-              <IonTitle>Recents</IonTitle>
-              <EntryList id="entry-list" entries={entries?.sort(compareByDate).slice(0, 5) ?? []} select={handleSelectEntry} /> 
+              <Recents
+                entries={entries}
+                handleSelectEntry={(entry) => handleSelectEntry(entry)} 
+               />
             </IonCol>
           </IonRow>
+        }
 
-          {/* Add note button */}
+        {/* By Date */}
+        {
+          selectedView === 'date' &&
+          <div id="row">
+            <Calendar 
+              entries={entries}  
+              handleSelectEntry={(entry) => handleSelectEntry(entry)} 
+            />
+          </div>
+        }
+
+        {/* By Tag */}
+        {
+          selectedView === 'tag' && 
           <IonRow>
-            <IonCol id="footer">
-              <IonFab>
-                <IonFabButton id="roundButton" onClick={handleAddEntry}>
-                <IonIcon size="large" icon={add}/>
-                </IonFabButton>
-              </IonFab>
+            <IonCol>
+              <IonSelect 
+                id="selector"
+                interface="popover"
+                value={selectedTag}
+                onIonChange={(val) => setSelectedTag(val.detail.value)}
+              >
+                {tags.map((tag: string) => (
+                  <IonSelectOption key={tag}>{tag}</IonSelectOption>
+                ))}
+              </IonSelect>
             </IonCol>
           </IonRow>
+        }
+
+        {/* By Mood */}
+        {
+          selectedView === 'mood' && 
+          <IonRow>
+            <IonCol>
+              <IonSelect 
+                id="selector"
+                interface="popover"
+                value={selectedMood}
+                onIonChange={(val) => setSelectedMood(val.detail.value)}
+              >
+                {Object.keys(Mood).map((mood) => (
+                  <IonSelectOption key={mood}>{mood.charAt(0).toUpperCase() + mood.slice(1).toLowerCase()}</IonSelectOption>
+                ))}
+              </IonSelect>
+            </IonCol>
+          </IonRow>
+        }
+
+        {/* Add note button */}
+        <IonRow>
+          <IonCol id="footer">
+            <IonFab>
+              <IonFabButton id="roundButton" onClick={handleAddEntry}>
+              <IonIcon size="large" icon={add}/>
+              </IonFabButton>
+            </IonFab>
+          </IonCol>
+        </IonRow>
           
         </IonContent>
       </IonPage>

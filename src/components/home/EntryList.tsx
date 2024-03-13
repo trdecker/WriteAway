@@ -10,7 +10,7 @@
 
 import { IonItem, IonLabel, IonList, IonText } from '@ionic/react'
 import { stripHtml } from 'string-strip-html'
-import { Entry } from '../types/Types.d'
+import { Entry } from '../../types/Types.d'
 import './EntryList.css'
 
 const EntryList: React.FC<{ entries: Entry[], id?: string, select: (entry: Entry) => void }> = ({ entries, id, select: emitSelect }) => {

@@ -12,12 +12,12 @@
 #title {
   font-size: x-large;
   font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-  margin-bottom: 0;
 
-  /* HOw can I remove the unneccessary padding in the IonInput?*/
+  /* How can I remove the unneccessary padding in the IonInput?*/
   --padding-end: 0px;
   --inner-padding-end: 0px;
 
+  padding-right: 8px;
   margin: 12px 12px 8px 4px;
 }
 
