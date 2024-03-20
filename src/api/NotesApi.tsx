@@ -12,7 +12,7 @@
 import axios from 'axios'
 import { config, store } from '../../config'
 import { Entry } from '../types/Types.d'
-import { UserPhoto } from '../hooks/usePhotoGallery'
+// import { UserPhoto } from '../hooks/usePhotoGallery'
 
 const url = config.url
 const corsProxyUrl = config.corsProxyUrl
@@ -43,7 +43,7 @@ export async function getEntries(userId: String) {
  * @param {Entry} entry
  * @returns the response if success; else null
  */
-export async function createEntry(userId: String, entry: Entry, _photos: UserPhoto[]) {
+export async function createEntry(userId: String, entry: Entry) {
   try {
     const authToken = await store.get('authToken')
     const path = `${isDev ? corsProxyUrl : ''}${url}/notes?userId=${encodeURIComponent(userId as string)}`
@@ -97,7 +97,7 @@ export async function deleteEntry(userId: String, itemId: String) {
       throw ('No item to delete')
   
     const path = `${isDev ? corsProxyUrl : ''}${url}/notes?userId=${encodeURIComponent(userId as string)}&noteId=${itemId}`
-    const authToken = store.get('authToken')
+    const authToken = await store.get('authToken')
 
     const response = await axios.delete(path, {
       headers: {

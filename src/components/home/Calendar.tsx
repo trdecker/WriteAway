@@ -2,7 +2,7 @@
  * @deprecated
  */
 
-import {  IonDatetime, IonItem, IonLabel, IonList } from "@ionic/react"
+import {  IonDatetime, IonList } from "@ionic/react"
 import { useEffect, useState } from "react"
 import { Entry } from "../../types/Types.d"
 import EntryList from "./EntryList"
