@@ -2,7 +2,7 @@
  * @deprecated
  */
 
-import { IonItem, IonLabel, IonList, IonText, IonTitle } from "@ionic/react"
+import { IonList, IonTitle } from "@ionic/react"
 import { Entry } from "../../types/Types.d"
 import EntryList from "./EntryList"
 

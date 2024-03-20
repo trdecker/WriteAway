@@ -1,7 +1,11 @@
+/**
+ * @description login button utilizing auth0
+ * @author Tad Decker
+ */
+
 import { useAuth0 } from '@auth0/auth0-react'
 import { Browser } from '@capacitor/browser'
 import { IonButton } from '@ionic/react'
-import { store } from '../../config'
 
 const LoginButton: React.FC<{ signup?: boolean }> = ({ signup=false }) => {
   const { loginWithRedirect } = useAuth0()
