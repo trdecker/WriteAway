@@ -1,3 +1,11 @@
+/**
+ * @description I tried migrating to auth0, but as I realized that was out of the
+ * scope of this project (as this is an example of front-end development, not back-end development
+ * or an actual application to be used in production), I
+ * quickly realized the time I was spending on authorization was unnecessary.
+ * @deprected
+ */
+
 import { isPlatform } from "@ionic/react"
 
 export const domain = "dev-1vvmxy1qoid3w4j6.us.auth0.com"

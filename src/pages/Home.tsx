@@ -5,17 +5,14 @@
  * 2-6-2024
  */
 
+import SearchMenu from '../components/home/SearchMenu'
+import Calendar from '../components/home/Calendar'
+import Recents from '../components/home/Recents'
 import { IonPage, IonContent, IonHeader, IonIcon, IonButton, IonRow, IonCol, IonMenu, IonToolbar, IonTitle, IonFab, IonFabButton, IonSelect, IonSelectOption } from '@ionic/react'
 import { menuController } from '@ionic/core/components'
-import SearchMenu from '../components/home/SearchMenu'
 import { useAppContext } from '../contexts/AppContext'
-import LogoutButton from '../components/LogoutButton'
-import Calendar from '../components/home/Calendar'
 import { add, menu, search } from 'ionicons/icons'
-import Profile from '../components/home/Profile'
-import Recents from '../components/home/Recents'
 import { Entry, Mood } from '../types/Types.d'
-import { useAuth0 } from '@auth0/auth0-react'
 import { getEntries } from '../api/NotesApi'
 import { useEffect, useState } from 'react'
 import { useHistory } from 'react-router'
@@ -31,8 +28,6 @@ const Home: React.FC = () => {
   const { reload } = useAppContext()
 
   const history = useHistory()
-
-  const { user, getAccessTokenSilently } = useAuth0()
 
   // FIXME: This is hardcoded. 
   const tags = [
@@ -51,12 +46,9 @@ const Home: React.FC = () => {
   useEffect(() => {
     async function fetchData() {
       try {
-        const token = await getAccessTokenSilently()
-        
-        await store.set('authToken', token)
-        const username = user?.nickname
-        if (username) {
-          const entries = await getEntries(username)
+        const userId = await store.get("userId")
+        if (userId) {
+          const entries = await getEntries(userId)
 
           if (entries) {
             setEntries(entries)
@@ -69,6 +61,14 @@ const Home: React.FC = () => {
 
     fetchData()
   }, [reload]) // How does this work?
+
+  const handleSignOut = async () => {
+    await store.set('username', '')
+    await store.set('userId', '')
+    await store.set('authToken', '')
+    await menuController.close('mainMenu')
+    history.push('/login')
+  }
 
   const handleAddEntry = async () => {
     await store.set('editMode', false)
@@ -96,8 +96,7 @@ const Home: React.FC = () => {
         </IonHeader>
         {/* User profile and logout button */}
         <IonContent className="ion-padding">
-          <Profile />
-          <LogoutButton />
+          <IonButton onClick={handleSignOut}>Sign out</IonButton>
         </IonContent>
       </IonMenu>
 
