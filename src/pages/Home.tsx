@@ -5,23 +5,22 @@
  * 2-6-2024
  */
 
-import { IonPage, IonContent, IonHeader, IonIcon, IonButton, IonDatetime, IonRow, IonCol, IonMenu, IonToolbar, IonTitle, IonInput, IonFab, IonFabButton, IonSelect, IonSelectOption } from '@ionic/react'
+import { IonPage, IonContent, IonHeader, IonIcon, IonButton, IonRow, IonCol, IonMenu, IonToolbar, IonTitle, IonFab, IonFabButton, IonSelect, IonSelectOption } from '@ionic/react'
 import { menuController } from '@ionic/core/components'
+import SearchMenu from '../components/home/SearchMenu'
 import { useAppContext } from '../contexts/AppContext'
+import LogoutButton from '../components/LogoutButton'
+import Calendar from '../components/home/Calendar'
 import { add, menu, search } from 'ionicons/icons'
+import Profile from '../components/home/Profile'
+import Recents from '../components/home/Recents'
 import { Entry, Mood } from '../types/Types.d'
 import { useAuth0 } from '@auth0/auth0-react'
 import { getEntries } from '../api/NotesApi'
 import { useEffect, useState } from 'react'
 import { useHistory } from 'react-router'
 import { store } from '../../config'
-import LogoutButton from '../components/LogoutButton'
-import EntryList from '../components/home/EntryList'
 import './Home.css'
-import Profile from '../components/home/Profile'
-import SearchMenu from '../components/home/SearchMenu'
-import Calendar from '../components/home/Calendar'
-import Recents from '../components/home/Recents'
 
 const Home: React.FC = () => {
   const [entries, setEntries] = useState<Entry[]>([])
