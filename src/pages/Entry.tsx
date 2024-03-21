@@ -6,10 +6,11 @@
  * 2-6-2024
  */
 
-import { InputChangeEventDetail, IonActionSheet, IonButton, IonCard, IonCol, IonContent, IonFabButton, IonHeader, IonIcon, IonImg, IonModal, IonPage, IonRow, IonSelect, IonSelectOption, IonTextarea, useIonLoading } from "@ionic/react"
+import { InputChangeEventDetail, IonActionSheet, IonButton, IonCard, IonCol, IonContent, IonFabButton, IonHeader, IonIcon, IonImg, IonMenu, IonModal, IonPage, IonRow, IonSelect, IonSelectOption, IonText, IonTextarea, IonToolbar, useIonLoading } from "@ionic/react"
 import { arrowBack, camera, close, menu, mic, save, trash } from "ionicons/icons"
 import { createEntry, deleteEntry, updateEntry } from '../api/NotesApi'
 import { usePhotoGallery, UserPhoto } from '../hooks/usePhotoGallery'
+import { menuController } from '@ionic/core/components'
 import { Entry, Mood, TagItem } from '../types/Types.d'
 import { useAppContext } from '../contexts/AppContext'
 import { useEffect, useRef, useState } from 'react'
@@ -54,43 +55,43 @@ const NewNote: React.FC = () => {
    * Get the current entry when "reload" changes
    */
   useEffect(() => {
-      async function getCurrEntry() {
-        try {
-          // presentLoading()
-          const currEntry: Entry = await store.get('currEntry')
-          if (currEntry) {
-            setTitle(currEntry.title)
-            setBody(currEntry.body)
-            setEntryId(currEntry.id)
-            setSelectedMoods(currEntry?.moods ?? [])
-            setSelectedTags(currEntry?.tags ?? [])
-            setIsEditMode(await store.get('editMode'))
-          }
-
-          // Retrive the tag names the user has created
-          const tags: TagItem[] = await store.get('tags')
-          // setUserTags(tags ?? [])
-          // FIXME: This is hardcoded
-          setUserTags([
-            "School",
-            "Dating",
-            "Church",
-            "Work",
-            "Family",
-            "Hobbies",
-            "Other"
-          ])
-          if (tags) {
-            // setUserTags((prevTags) => [...prevTags, ...tags])
-          }
-        } catch (e) {
-          console.error(e)
-        } finally {
-          dismissLoading()
+    async function getCurrEntry() {
+      try {
+        // presentLoading()
+        const currEntry: Entry = await store.get('currEntry')
+        if (currEntry) {
+          setTitle(currEntry?.title ?? '')
+          setBody(currEntry?.body ?? '')
+          setEntryId(currEntry.id)
+          setSelectedMoods(currEntry?.moods ?? [])
+          setSelectedTags(currEntry?.tags ?? [])
+          setIsEditMode(await store.get('editMode'))
         }
-      }
 
-      getCurrEntry()
+        // Retrive the tag names the user has created
+        const tags: TagItem[] = await store.get('tags')
+        // setUserTags(tags ?? [])
+        // FIXME: This is hardcoded
+        setUserTags([
+          "School",
+          "Dating",
+          "Church",
+          "Work",
+          "Family",
+          "Hobbies",
+          "Other"
+        ])
+        if (tags) {
+          // setUserTags((prevTags) => [...prevTags, ...tags])
+        }
+      } catch (e) {
+        console.error(e)
+      } finally {
+        dismissLoading()
+      }
+    }
+
+    getCurrEntry()
   }, [reload])
 
   const changeTitle = (ev: CustomEvent<InputChangeEventDetail>) => {
@@ -126,6 +127,11 @@ const NewNote: React.FC = () => {
     setIsEditMode(false)
     await store.set('currEntry', null)
     reload()
+    setTitle('')
+    setBody('')
+    setSelectedMoods([])
+    setSelectedTags([])
+    setEntryId(undefined)
     history.push('/home')
   }
 
@@ -192,15 +198,58 @@ const NewNote: React.FC = () => {
   }
 
   return (
-    <IonPage id="entryPage">
-      {/* Content */}
-      <IonContent fullscreen>
+    <IonContent fullscreen>
+      {/* Menu */}
+      <IonMenu menuId="entryMenu" contentId="main-content">
+        {/* Delete entry */}
+        <IonContent className="ion-padding">
+          {/* Select Tags */}
+          <IonText>Tags</IonText>
+          <IonSelect 
+            labelPlacement="floating" 
+            interface="popover" 
+            onIonChange={handleSelectTag} 
+            multiple={true}
+            fill="outline"
+            id="selector"
+          >
+            {/* Every user created tag will be shown */}
+            {userTags.map((tag: string) => (
+              <IonSelectOption key={tag}>{tag}</IonSelectOption>
+            ))}
+          </IonSelect>
+          {/* Select Moods */}
+          <IonText>Moods</IonText>
+          <IonSelect
+            value={selectedMoods}
+            labelPlacement="floating"
+            interface="popover" 
+            multiple={true} 
+            onIonChange={handleSelectMood}
+            fill="outline"
+            id="selector"
+          >
+            {/* Every "mood" will be shown */}
+            {Object.keys(Mood).map((mood) => (
+              <IonSelectOption key={mood}>{mood.charAt(0).toUpperCase() + mood.slice(1).toLowerCase()}</IonSelectOption>
+            ))}
+          </IonSelect>
+          {/* Delete Entry Button */}
+          <IonFabButton onClick={() => setMarkedDelete(true)} color="danger">
+            <IonIcon icon={trash} size="large" />
+          </IonFabButton>
+        </IonContent>
+      </IonMenu>
+
+      <IonPage>
         {/* Header buttons */}
         <IonHeader id="header">
-          {/* Menu Button */}
-          <IonButton id="roundButton" onClick={handleBackButton}><IonIcon icon={arrowBack} /></IonButton>
-          {/* Search Button */}
-          <IonButton id="roundButton"><IonIcon icon={menu} /></IonButton>
+          <IonToolbar>
+            {/* Menu Button */}
+            <IonButton id="roundButton" onClick={handleBackButton}><IonIcon icon={arrowBack} /></IonButton>
+            {/* Menu Button */}
+            <IonButton slot="start" id="roundButton" onClick={() => menuController.open('entryMenu')}><IonIcon icon={menu} /></IonButton>
+          </IonToolbar>
         </IonHeader>
 
         {/* Title*/}
@@ -217,38 +266,9 @@ const NewNote: React.FC = () => {
         <IonRow>
           {/* Tags */}  
           <IonCol>
-            <IonSelect 
-              label="Tags" 
-              labelPlacement="floating" 
-              interface="popover" 
-              onIonChange={handleSelectTag} 
-              multiple={true}
-              fill="outline"
-              id="selector"
-              >
-              {/* Every user created tag will be shown */}
-              {userTags.map((tag: string) => (
-                <IonSelectOption key={tag}>{tag}</IonSelectOption>
-              ))}
-            </IonSelect>
           </IonCol>
             {/* Moods */}
           <IonCol>
-            <IonSelect 
-              value={selectedMoods}
-              label="Moods" 
-              labelPlacement="floating" 
-              interface="popover" 
-              multiple={true} 
-              onIonChange={handleSelectMood}
-              fill="outline"
-              id="selector"
-            >
-              {/* Every "mood" will be shown */}
-              {Object.keys(Mood).map((mood) => (
-                <IonSelectOption key={mood}>{mood.charAt(0).toUpperCase() + mood.slice(1).toLowerCase()}</IonSelectOption>
-              ))}
-            </IonSelect>
           </IonCol>
         </IonRow>
 
@@ -279,7 +299,8 @@ const NewNote: React.FC = () => {
         </IonRow>
 
         {/* Audio recordings */}
-        {recordings.map(recording => 
+        {
+          recordings.map(recording => 
             <IonRow key={recording.src}>
               <ReactAudioPlayer src={recording.src} controls />
               <IonFabButton 
@@ -294,7 +315,7 @@ const NewNote: React.FC = () => {
                 <IonIcon icon={trash} />
               </IonFabButton>
             </IonRow>
-            )
+          )
         }
 
         {/* Body rich text editor */}
@@ -303,20 +324,13 @@ const NewNote: React.FC = () => {
           theme="snow" 
           value={body} 
           onChange={setBody}
-          />
+        />
 
         {/* Buttons */}
-        {/* TODO: pretty up and TODO: functionality :) */}
         <div id="footer">
           <IonFabButton onClick={() => takePhoto()}><IonIcon icon={camera} /></IonFabButton>
           <IonFabButton id="recordButton" onClick={() => setIsRecording(true)}><IonIcon icon={mic} /></IonFabButton>
           <IonFabButton onClick={handleSaveEntry}><IonIcon icon={save} /></IonFabButton>
-
-          {isEditMode ?
-            <IonFabButton onClick={() => setMarkedDelete(true)} color="danger">
-              <IonIcon icon={trash} size="large" />
-            </IonFabButton>
-            : null}
         </div>
         {/* Delete photo confirmation message */}
         <IonActionSheet
@@ -345,20 +359,24 @@ const NewNote: React.FC = () => {
         {/* Delete entry confirmation message */}
         <IonActionSheet
           isOpen={markedDelete}
+          header={'Are you sure you want ' + (isEditMode ? 'to cancel?' : 'to delete this entry?')}
           buttons={[
             {
-              text: 'Are you sure you want to delete this entry?',
+              text: 'Yes',
               role: 'destructive',
               icon: trash,
               handler: async () => {
-                const userId = await store.get('userId')
-                console.log(userId, entryId)
-                if (entryId && userId) {
-                  presentLoading()
-                  await deleteEntry(userId, entryId.toString())
-                  await handleBackButton()
-                  dismissLoading()
+                presentLoading()
+
+                // If editing an existing item, delete from database
+                if (!isEditMode) {
+                  const userId = await store.get('userId')
+                  if (entryId && userId) {
+                    await deleteEntry(userId, entryId.toString())
+                  }
                 }
+                await handleBackButton()
+                dismissLoading()
               },
             },
             {
@@ -370,6 +388,7 @@ const NewNote: React.FC = () => {
           onDidDismiss={() => setMarkedDelete(false)}
         />
 
+        {/* Recording Modal */}
         <IonModal
           id="recording-modal"
           ref={recordingModal}
@@ -392,8 +411,8 @@ const NewNote: React.FC = () => {
             </IonCard>
           </IonContent>
         </IonModal>
-      </IonContent>
-    </IonPage>
+      </IonPage>
+    </IonContent>
   )
 }
 

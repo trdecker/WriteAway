@@ -5,6 +5,7 @@
  * 2-6-2024
  */
 
+import EntriesByTag from '../components/home/EntriesByTag'
 import SearchMenu from '../components/home/SearchMenu'
 import Calendar from '../components/home/Calendar'
 import Recents from '../components/home/Recents'
@@ -18,27 +19,15 @@ import { useEffect, useState } from 'react'
 import { useHistory } from 'react-router'
 import { store } from '../../config'
 import './Home.css'
+import EntriesByMood from '../components/home/EntriesByMood'
 
 const Home: React.FC = () => {
   const [entries, setEntries] = useState<Entry[]>([])
   const [selectedView, setSelectedView] = useState<string>('Recents')
-  const [selectedMood, setSelectedMood] = useState<Mood>()
-  const [selectedTag, setSelectedTag] = useState<string>('')
 
   const { reload } = useAppContext()
 
   const history = useHistory()
-
-  // FIXME: This is hardcoded. 
-  const tags = [
-    "School",
-    "Dating",
-    "Church",
-    "Work",
-    "Family",
-    "Hobbies",
-    "Other"
-  ]
 
   /**
    * Retrieve entries!
@@ -146,7 +135,6 @@ const Home: React.FC = () => {
           </IonCol>
         </IonRow>
 
-
         {/* Recents */}
         {
           selectedView === 'recents' && 
@@ -166,7 +154,7 @@ const Home: React.FC = () => {
           <div id="row">
             <Calendar 
               entries={entries}  
-              handleSelectEntry={(entry) => handleSelectEntry(entry)} 
+              handleSelectEntry={(entry) => handleSelectEntry(entry)}
             />
           </div>
         }
@@ -176,16 +164,10 @@ const Home: React.FC = () => {
           selectedView === 'tag' && 
           <IonRow>
             <IonCol>
-              <IonSelect 
-                id="selector"
-                interface="popover"
-                value={selectedTag}
-                onIonChange={(val) => setSelectedTag(val.detail.value)}
-              >
-                {tags.map((tag: string) => (
-                  <IonSelectOption key={tag}>{tag}</IonSelectOption>
-                ))}
-              </IonSelect>
+              <EntriesByTag 
+                entries={entries} 
+                handleSelectEntry={(entry) => handleSelectEntry(entry)}
+              />
             </IonCol>
           </IonRow>
         }
@@ -195,16 +177,10 @@ const Home: React.FC = () => {
           selectedView === 'mood' && 
           <IonRow>
             <IonCol>
-              <IonSelect 
-                id="selector"
-                interface="popover"
-                value={selectedMood}
-                onIonChange={(val) => setSelectedMood(val.detail.value)}
-              >
-                {Object.keys(Mood).map((mood) => (
-                  <IonSelectOption key={mood}>{mood.charAt(0).toUpperCase() + mood.slice(1).toLowerCase()}</IonSelectOption>
-                ))}
-              </IonSelect>
+              <EntriesByMood
+                entries={entries} 
+                handleSelectEntry={(entry) => handleSelectEntry(entry)}
+              />
             </IonCol>
           </IonRow>
         }
