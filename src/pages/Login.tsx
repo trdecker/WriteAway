@@ -95,7 +95,7 @@ const Login: React.FC = () => {
 		<IonPage id="page">	
 			<IonContent>
 				<IonRow class="IonRow">
-					<IonImg id="logo" src="../../public/assets/logo1.png" alt="WriteAway logo" ></IonImg>
+					<IonImg id="logo" src="../../public/assets/logo1-removebg.png" alt="WriteAway logo" ></IonImg>
 				</IonRow>
 				{/* Username entry */}
 				<IonRow class="IonRow">
