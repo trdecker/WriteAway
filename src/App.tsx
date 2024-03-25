@@ -9,10 +9,6 @@
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react'
 import { Redirect, Route } from 'react-router-dom'
 import { IonReactRouter } from '@ionic/react-router'
-import { useEffect } from 'react'
-import { useAuth0 } from '@auth0/auth0-react'
-import { Browser } from '@capacitor/browser'
-import { App as CapApp } from '@capacitor/app'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import NewNote from './pages/Entry'
@@ -39,20 +35,7 @@ import { AppProvider } from './contexts/AppContext'
 
 setupIonicReact()
 
-const App: React.FC = () => {
-  const { handleRedirectCallback } = useAuth0()
-
-  useEffect(() => {
-    // Handle the 'appUrlOpen' event and call `handleRedirectCallback`
-    CapApp.addListener('appUrlOpen', async ({ url }) => {
-      if (url.includes('state') && (url.includes('code') || url.includes('error'))) {
-        await handleRedirectCallback(url);
-      }
-      // No-op on Android
-      await Browser.close()
-    })
-  }, [handleRedirectCallback])
-
+const App: React.FC = () => { 
   return (
     <IonApp>
       <AppProvider>
@@ -77,7 +60,7 @@ const App: React.FC = () => {
         </IonReactRouter>
       </AppProvider>
     </IonApp>
-)
+  )
 }
   
 

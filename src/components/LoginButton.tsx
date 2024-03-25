@@ -1,5 +1,6 @@
 /**
  * @description login button utilizing auth0
+ * @deprecated
  * @author Tad Decker
  */
 

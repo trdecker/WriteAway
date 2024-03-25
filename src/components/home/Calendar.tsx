@@ -1,8 +1,12 @@
 /**
- * @deprecated
+ * @file Calendar.tsx
+ * @description Filter entries by a selected date on the calendar
+ * 
+ * @author Tad Decker
+ * 3/20/2024
  */
 
-import {  IonDatetime, IonList } from "@ionic/react"
+import { IonDatetime, IonList } from "@ionic/react"
 import { useEffect, useState } from "react"
 import { Entry } from "../../types/Types.d"
 import EntryList from "./EntryList"
@@ -19,11 +23,28 @@ const Calendar: React.FC<params> = ({ entries, handleSelectEntry }) => {
   useEffect(() => {
     async function updateEntries() {
       // TODO: Do the thing here!
+      const selectedDateString = selectedDate.substring(0, 10)
+
+      const newEntries = []
+
+      for (const entry of entries) {
+        if (entry?.date) {
+          const entryDateString = new Date(entry.date).toISOString().substring(0, 10)
+          if (entryDateString === selectedDateString)
+            newEntries.push(entry)
+        }
+      }
+
+      setDayEntries(newEntries)
     }
 
-    updateEntries
+    updateEntries()
   }, [selectedDate])
 
+  /**
+   * @description If the user selecs 
+   * @param newDate
+   */
   const handleSelectDate = (newDate: string | string[]) => {
     if (newDate) {
       if (newDate.constructor === Array)

@@ -5,45 +5,29 @@
  * 2-6-2024
  */
 
+import EntriesByTag from '../components/home/EntriesByTag'
+import SearchMenu from '../components/home/SearchMenu'
+import Calendar from '../components/home/Calendar'
+import Recents from '../components/home/Recents'
 import { IonPage, IonContent, IonHeader, IonIcon, IonButton, IonRow, IonCol, IonMenu, IonToolbar, IonTitle, IonFab, IonFabButton, IonSelect, IonSelectOption } from '@ionic/react'
 import { menuController } from '@ionic/core/components'
-import SearchMenu from '../components/home/SearchMenu'
 import { useAppContext } from '../contexts/AppContext'
-import LogoutButton from '../components/LogoutButton'
-import Calendar from '../components/home/Calendar'
 import { add, menu, search } from 'ionicons/icons'
-import Profile from '../components/home/Profile'
-import Recents from '../components/home/Recents'
 import { Entry, Mood } from '../types/Types.d'
-import { useAuth0 } from '@auth0/auth0-react'
 import { getEntries } from '../api/NotesApi'
 import { useEffect, useState } from 'react'
 import { useHistory } from 'react-router'
 import { store } from '../../config'
 import './Home.css'
+import EntriesByMood from '../components/home/EntriesByMood'
 
 const Home: React.FC = () => {
   const [entries, setEntries] = useState<Entry[]>([])
   const [selectedView, setSelectedView] = useState<string>('Recents')
-  const [selectedMood, setSelectedMood] = useState<Mood>()
-  const [selectedTag, setSelectedTag] = useState<string>('')
 
   const { reload } = useAppContext()
 
   const history = useHistory()
-
-  const { user, getAccessTokenSilently } = useAuth0()
-
-  // FIXME: This is hardcoded. 
-  const tags = [
-    "School",
-    "Dating",
-    "Church",
-    "Work",
-    "Family",
-    "Hobbies",
-    "Other"
-  ]
 
   /**
    * Retrieve entries!
@@ -51,12 +35,9 @@ const Home: React.FC = () => {
   useEffect(() => {
     async function fetchData() {
       try {
-        const token = await getAccessTokenSilently()
-        
-        await store.set('authToken', token)
-        const username = user?.nickname
-        if (username) {
-          const entries = await getEntries(username)
+        const userId = await store.get("userId")
+        if (userId) {
+          const entries = await getEntries(userId)
 
           if (entries) {
             setEntries(entries)
@@ -69,6 +50,14 @@ const Home: React.FC = () => {
 
     fetchData()
   }, [reload]) // How does this work?
+
+  const handleSignOut = async () => {
+    await store.set('username', '')
+    await store.set('userId', '')
+    await store.set('authToken', '')
+    await menuController.close('mainMenu')
+    history.push('/login')
+  }
 
   const handleAddEntry = async () => {
     await store.set('editMode', false)
@@ -96,8 +85,7 @@ const Home: React.FC = () => {
         </IonHeader>
         {/* User profile and logout button */}
         <IonContent className="ion-padding">
-          <Profile />
-          <LogoutButton />
+          <IonButton onClick={handleSignOut}>Sign out</IonButton>
         </IonContent>
       </IonMenu>
 
@@ -130,97 +118,83 @@ const Home: React.FC = () => {
         </IonHeader>
         {/* Content */}
         <IonContent fullscreen> 
-        <IonRow>
-          <IonCol>
-            <IonSelect 
-              id="selector"
-              interface="popover"
-              value={selectedView}
-              onIonChange={(val) => setSelectedView(val.detail.value)}
-              defaultValue="recents"
-            >
-              <IonSelectOption value="recents">Recents</IonSelectOption>
-              <IonSelectOption value="date">By Date</IonSelectOption>
-              <IonSelectOption value="tag">By Tag</IonSelectOption>
-              <IonSelectOption value="mood">By Mood</IonSelectOption>
-            </IonSelect>
-          </IonCol>
-        </IonRow>
-
-
-        {/* Recents */}
-        {
-          selectedView === 'recents' && 
-          <IonRow>
-            <IonCol>
-              <Recents
-                entries={entries}
-                handleSelectEntry={(entry) => handleSelectEntry(entry)} 
-               />
-            </IonCol>
-          </IonRow>
-        }
-
-        {/* By Date */}
-        {
-          selectedView === 'date' &&
-          <div id="row">
-            <Calendar 
-              entries={entries}  
-              handleSelectEntry={(entry) => handleSelectEntry(entry)} 
-            />
-          </div>
-        }
-
-        {/* By Tag */}
-        {
-          selectedView === 'tag' && 
           <IonRow>
             <IonCol>
               <IonSelect 
                 id="selector"
                 interface="popover"
-                value={selectedTag}
-                onIonChange={(val) => setSelectedTag(val.detail.value)}
+                value={selectedView}
+                onIonChange={(val) => setSelectedView(val.detail.value)}
+                defaultValue="recents"
               >
-                {tags.map((tag: string) => (
-                  <IonSelectOption key={tag}>{tag}</IonSelectOption>
-                ))}
+                <IonSelectOption value="recents">Recents</IonSelectOption>
+                <IonSelectOption value="date">By Date</IonSelectOption>
+                <IonSelectOption value="tag">By Tag</IonSelectOption>
+                <IonSelectOption value="mood">By Mood</IonSelectOption>
               </IonSelect>
             </IonCol>
           </IonRow>
-        }
 
-        {/* By Mood */}
-        {
-          selectedView === 'mood' && 
+          {/* Recents */}
+          {
+            selectedView === 'recents' && 
+            <IonRow>
+              <IonCol>
+                <Recents
+                  entries={entries}
+                  handleSelectEntry={(entry) => handleSelectEntry(entry)} 
+                />
+              </IonCol>
+            </IonRow>
+          }
+
+          {/* By Date */}
+          {
+            selectedView === 'date' &&
+            <div id="row">
+              <Calendar 
+                entries={entries}  
+                handleSelectEntry={(entry) => handleSelectEntry(entry)}
+              />
+            </div>
+          }
+
+          {/* By Tag */}
+          {
+            selectedView === 'tag' && 
+            <IonRow>
+              <IonCol>
+                <EntriesByTag 
+                  entries={entries} 
+                  handleSelectEntry={(entry) => handleSelectEntry(entry)}
+                />
+              </IonCol>
+            </IonRow>
+          }
+
+          {/* By Mood */}
+          {
+            selectedView === 'mood' && 
+            <IonRow>
+              <IonCol>
+                <EntriesByMood
+                  entries={entries} 
+                  handleSelectEntry={(entry) => handleSelectEntry(entry)}
+                />
+              </IonCol>
+            </IonRow>
+          }
+
+          {/* Add note button */}
           <IonRow>
-            <IonCol>
-              <IonSelect 
-                id="selector"
-                interface="popover"
-                value={selectedMood}
-                onIonChange={(val) => setSelectedMood(val.detail.value)}
-              >
-                {Object.keys(Mood).map((mood) => (
-                  <IonSelectOption key={mood}>{mood.charAt(0).toUpperCase() + mood.slice(1).toLowerCase()}</IonSelectOption>
-                ))}
-              </IonSelect>
+            <IonCol id="footer">
+              <IonFab>
+                <IonFabButton id="roundButton" onClick={handleAddEntry}>
+                <IonIcon size="large" icon={add}/>
+                </IonFabButton>
+              </IonFab>
             </IonCol>
           </IonRow>
-        }
-
-        {/* Add note button */}
-        <IonRow>
-          <IonCol id="footer">
-            <IonFab>
-              <IonFabButton id="roundButton" onClick={handleAddEntry}>
-              <IonIcon size="large" icon={add}/>
-              </IonFabButton>
-            </IonFab>
-          </IonCol>
-        </IonRow>
-          
         </IonContent>
       </IonPage>
     </IonContent>
