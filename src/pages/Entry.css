@@ -1,5 +1,5 @@
 #entryPage {
-  margin: 20px 20px;
+  /* margin: 2000px 20000px; */
 }
 
 #header {
@@ -27,7 +27,7 @@
 }
 
 #body {
-  height: 40%;
+  height: 30%;
   margin-bottom: 52px;
   /* overflow: auto; */
 }

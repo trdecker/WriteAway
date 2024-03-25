@@ -198,7 +198,7 @@ const NewNote: React.FC = () => {
   }
 
   return (
-    <IonContent fullscreen>
+    <IonContent fullscreen scrollY={false}>
       {/* Menu */}
       <IonMenu menuId="entryMenu" contentId="main-content">
         {/* Delete entry */}
@@ -218,6 +218,18 @@ const NewNote: React.FC = () => {
               <IonSelectOption key={tag}>{tag}</IonSelectOption>
             ))}
           </IonSelect>
+                    {/* New tag button */}
+          {/* <IonButton id="new-tag" fill="clear" size="small">New Tag</IonButton>
+          <IonAlert
+            trigger="new-tag"
+            header="Create new tag"
+            buttons={['Cancel','OK']}
+            inputs={[
+              {
+                placeholder: 'My new tag'
+              },
+            ]}
+          /> */}
           {/* Select Moods */}
           <IonText>Moods</IonText>
           <IonSelect
@@ -252,86 +264,67 @@ const NewNote: React.FC = () => {
           </IonToolbar>
         </IonHeader>
 
-        {/* Title*/}
-        <IonTextarea 
-          id="title"
-          value={title} 
-          onIonInput={changeTitle}
-          label="Title"
-          labelPlacement="floating"
-          fill="outline"
+        {/* Page content */}
+        <IonContent id="entryPage">
+          {/* Title*/}
+          <IonTextarea 
+            id="title"
+            value={title} 
+            onIonInput={changeTitle}
+            label="Title"
+            labelPlacement="floating"
+            fill="outline"
           />
 
-        {/* Tags and Moods */}
-        <IonRow>
-          {/* Tags */}  
-          <IonCol>
-          </IonCol>
-            {/* Moods */}
-          <IonCol>
-          </IonCol>
-        </IonRow>
-
-        {/* New tag button */}
-        {/* <IonButton id="new-tag" fill="clear" size="small">New Tag</IonButton>
-        <IonAlert
-          trigger="new-tag"
-          header="Create new tag"
-          buttons={['Cancel','OK']}
-          inputs={[
-            {
-              placeholder: 'My new tag'
-            },
-          ]}
-        /> */}
-
-        {/* Images */}
-        <IonRow>
           {/* Images */}
+          <IonRow>
+            {/* Images */}
+            {
+              photos.length > 0 ? 
+              photos.map((photo, index) => (
+                <IonCol size="6" key={index}>
+                  <IonImg onClick={() => setPhotoToDelete(photo)} src={photo.webviewPath} />
+                </IonCol>
+              )) : ''
+            }
+          </IonRow>
+
+          {/* Audio recordings */}
           {
-            photos.length > 0 ? 
-            photos.map((photo, index) => (
-              <IonCol size="6" key={index}>
-                <IonImg onClick={() => setPhotoToDelete(photo)} src={photo.webviewPath} />
-              </IonCol>
-            )) : ''
+            recordings.map(recording => 
+              <IonRow key={recording.src}>
+                <ReactAudioPlayer src={recording.src} controls />
+                <IonFabButton 
+                  // When selected, remove delete the recording.
+                  // How do I get this to run faster?
+                  // TODO: Make this less icky
+                  onClick={() => {
+                    const index = recordings.findIndex((val) => val.src === recording.src )
+                    console.log('yep')
+                    recordings.splice(index, 1)
+                  }}>
+                  <IonIcon icon={trash} />
+                </IonFabButton>
+              </IonRow>
+            )
           }
-        </IonRow>
 
-        {/* Audio recordings */}
-        {
-          recordings.map(recording => 
-            <IonRow key={recording.src}>
-              <ReactAudioPlayer src={recording.src} controls />
-              <IonFabButton 
-                // When selected, remove delete the recording.
-                // How do I get this to run faster?
-                // TODO: Make this less icky
-                onClick={() => {
-                  const index = recordings.findIndex((val) => val.src === recording.src )
-                  console.log('yep')
-                  recordings.splice(index, 1)
-                }}>
-                <IonIcon icon={trash} />
-              </IonFabButton>
-            </IonRow>
-          )
-        }
+          {/* Body rich text editor */}
+          <ReactQuill 
+            id="body"
+            theme="snow" 
+            value={body} 
+            onChange={setBody}
+          />
 
-        {/* Body rich text editor */}
-        <ReactQuill 
-          id="body"
-          theme="snow" 
-          value={body} 
-          onChange={setBody}
-        />
+          {/* Buttons */}
+          <div id="footer">
+            <IonFabButton onClick={() => takePhoto()}><IonIcon icon={camera} /></IonFabButton>
+            <IonFabButton id="recordButton" onClick={() => setIsRecording(true)}><IonIcon icon={mic} /></IonFabButton>
+            <IonFabButton onClick={handleSaveEntry}><IonIcon icon={save} /></IonFabButton>
+          </div>
+        </IonContent>
 
-        {/* Buttons */}
-        <div id="footer">
-          <IonFabButton onClick={() => takePhoto()}><IonIcon icon={camera} /></IonFabButton>
-          <IonFabButton id="recordButton" onClick={() => setIsRecording(true)}><IonIcon icon={mic} /></IonFabButton>
-          <IonFabButton onClick={handleSaveEntry}><IonIcon icon={save} /></IonFabButton>
-        </div>
         {/* Delete photo confirmation message */}
         <IonActionSheet
           isOpen={!!photoToDelete}

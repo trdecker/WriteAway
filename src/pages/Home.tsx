@@ -118,84 +118,83 @@ const Home: React.FC = () => {
         </IonHeader>
         {/* Content */}
         <IonContent fullscreen> 
-        <IonRow>
-          <IonCol>
-            <IonSelect 
-              id="selector"
-              interface="popover"
-              value={selectedView}
-              onIonChange={(val) => setSelectedView(val.detail.value)}
-              defaultValue="recents"
-            >
-              <IonSelectOption value="recents">Recents</IonSelectOption>
-              <IonSelectOption value="date">By Date</IonSelectOption>
-              <IonSelectOption value="tag">By Tag</IonSelectOption>
-              <IonSelectOption value="mood">By Mood</IonSelectOption>
-            </IonSelect>
-          </IonCol>
-        </IonRow>
-
-        {/* Recents */}
-        {
-          selectedView === 'recents' && 
           <IonRow>
             <IonCol>
-              <Recents
-                entries={entries}
-                handleSelectEntry={(entry) => handleSelectEntry(entry)} 
-               />
+              <IonSelect 
+                id="selector"
+                interface="popover"
+                value={selectedView}
+                onIonChange={(val) => setSelectedView(val.detail.value)}
+                defaultValue="recents"
+              >
+                <IonSelectOption value="recents">Recents</IonSelectOption>
+                <IonSelectOption value="date">By Date</IonSelectOption>
+                <IonSelectOption value="tag">By Tag</IonSelectOption>
+                <IonSelectOption value="mood">By Mood</IonSelectOption>
+              </IonSelect>
             </IonCol>
           </IonRow>
-        }
 
-        {/* By Date */}
-        {
-          selectedView === 'date' &&
-          <div id="row">
-            <Calendar 
-              entries={entries}  
-              handleSelectEntry={(entry) => handleSelectEntry(entry)}
-            />
-          </div>
-        }
+          {/* Recents */}
+          {
+            selectedView === 'recents' && 
+            <IonRow>
+              <IonCol>
+                <Recents
+                  entries={entries}
+                  handleSelectEntry={(entry) => handleSelectEntry(entry)} 
+                />
+              </IonCol>
+            </IonRow>
+          }
 
-        {/* By Tag */}
-        {
-          selectedView === 'tag' && 
-          <IonRow>
-            <IonCol>
-              <EntriesByTag 
-                entries={entries} 
+          {/* By Date */}
+          {
+            selectedView === 'date' &&
+            <div id="row">
+              <Calendar 
+                entries={entries}  
                 handleSelectEntry={(entry) => handleSelectEntry(entry)}
               />
-            </IonCol>
-          </IonRow>
-        }
+            </div>
+          }
 
-        {/* By Mood */}
-        {
-          selectedView === 'mood' && 
+          {/* By Tag */}
+          {
+            selectedView === 'tag' && 
+            <IonRow>
+              <IonCol>
+                <EntriesByTag 
+                  entries={entries} 
+                  handleSelectEntry={(entry) => handleSelectEntry(entry)}
+                />
+              </IonCol>
+            </IonRow>
+          }
+
+          {/* By Mood */}
+          {
+            selectedView === 'mood' && 
+            <IonRow>
+              <IonCol>
+                <EntriesByMood
+                  entries={entries} 
+                  handleSelectEntry={(entry) => handleSelectEntry(entry)}
+                />
+              </IonCol>
+            </IonRow>
+          }
+
+          {/* Add note button */}
           <IonRow>
-            <IonCol>
-              <EntriesByMood
-                entries={entries} 
-                handleSelectEntry={(entry) => handleSelectEntry(entry)}
-              />
+            <IonCol id="footer">
+              <IonFab>
+                <IonFabButton id="roundButton" onClick={handleAddEntry}>
+                <IonIcon size="large" icon={add}/>
+                </IonFabButton>
+              </IonFab>
             </IonCol>
           </IonRow>
-        }
-
-        {/* Add note button */}
-        <IonRow>
-          <IonCol id="footer">
-            <IonFab>
-              <IonFabButton id="roundButton" onClick={handleAddEntry}>
-              <IonIcon size="large" icon={add}/>
-              </IonFabButton>
-            </IonFab>
-          </IonCol>
-        </IonRow>
-          
         </IonContent>
       </IonPage>
     </IonContent>
