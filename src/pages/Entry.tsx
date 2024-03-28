@@ -22,7 +22,6 @@ import 'react-quill/dist/quill.snow.css'
 import './Entry.css'
 import ReactAudioPlayer from "react-audio-player"
 import AudioRecorder from "../components/entry/AudioRecorder"
-import { useAuth0 } from "@auth0/auth0-react"
 
 const NewNote: React.FC = () => {
   const { photos, takePhoto, deletePhoto } = usePhotoGallery()
@@ -44,8 +43,6 @@ const NewNote: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false)
 
   const [markedDelete, setMarkedDelete] = useState(false)
-
-  const { user } = useAuth0()
 
   const { reload } = useAppContext()
 
@@ -138,7 +135,7 @@ const NewNote: React.FC = () => {
   const handleSaveEntry = async () => {
     try {
       await presentLoading()
-      const userId = user?.nickname
+      const userId = await store.get('userId')
 
       // Get a list of upload photos in the right format
 
