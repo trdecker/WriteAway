@@ -1,26 +1,30 @@
-#entryPage {
-  /* margin: 2000px 20000px; */
+#dateInput {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-bottom: 20px;
 }
 
 #header {
   display: flex;
-  flex-direction: row;
+  flex-direction: row-reverse;
   justify-content: space-between;
   padding: 0;
 }
 
 #title {
+  padding: 0 20px
+}
+
+#titleInput {
   font-size: x-large;
-  font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 
   /* How can I remove the unneccessary padding in the IonInput?*/
-  --padding-end: 0px;
-  --inner-padding-end: 0px;
 
   padding-right: 8px;
   margin: 12px 12px 8px 4px;
 }
-
 
 #selector {
   margin-bottom: 20px
@@ -28,8 +32,7 @@
 
 #body {
   height: 30%;
-  margin-bottom: 52px;
-  /* overflow: auto; */
+  margin: 0 24px 52px 24px;
 }
 
 ion-modal#recording-modal {
@@ -37,9 +40,8 @@ ion-modal#recording-modal {
   --box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
-
 #footer {
   display: flex;
   flex-direction: row;
-  justify-content: flex-end;
+  justify-content: space-evenly;
 }

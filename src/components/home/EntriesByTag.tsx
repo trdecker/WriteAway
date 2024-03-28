@@ -2,14 +2,20 @@
  * @file Calendar.tsx
  * @description Filter entries by a selected tag on list
  * 
+ * @todo select multiple tags
+ * 
  * @author Tad Decker
  * 3/20/2024
  */
 
-import { IonList, IonSelect, IonSelectOption } from "@ionic/react"
+import { IonRow, IonCol, IonFab, IonFabButton, IonIcon, IonSelect, IonSelectOption } from "@ionic/react"
 import { useEffect, useState } from "react"
 import { Entry } from "../../types/Types.d"
 import EntryList from "./EntryList"
+import { add } from "ionicons/icons"
+import { useHistory } from 'react-router'
+import { store } from '../../../config'
+import { useAppContext } from '../../contexts/AppContext'
 
 // FIXME: This is hardcoded. 
 const tags = [
@@ -31,25 +37,28 @@ const EntriesByTag: React.FC<params> = ({ entries, handleSelectEntry }) => {
   const [selectedTag, setSelectedTag] = useState<string>('')
   const [tagEntries, setTagEntries] = useState<Entry[]>([])
 
-  useEffect(() => {
-    async function updateEntries() {
-      // TODO: Do the thing here!
-      const newEntries: Entry[] = []
+  const history = useHistory()
+  const { reload } = useAppContext()
 
-      for (const entry of entries) {
-        if (entry?.tags?.includes(selectedTag)) {
-          newEntries.push(entry)
-        }
+  async function updateEntries() {
+    const newEntries: Entry[] = []
+
+    for (const entry of entries) {
+      if (entry?.tags?.includes(selectedTag)) {
+        newEntries.push(entry)
       }
-
-      setTagEntries(newEntries)
     }
 
+    setTagEntries(newEntries)
+  }
+
+  useEffect(() => {
     updateEntries()
-  }, [selectedTag])
+  }, [selectedTag, entries])
 
   return (
-    <IonList lines="inset">
+    <div>
+      {/* Tag selector */}
       <IonSelect 
         id="selector"
         interface="popover"
@@ -60,9 +69,30 @@ const EntriesByTag: React.FC<params> = ({ entries, handleSelectEntry }) => {
           <IonSelectOption key={tag}>{tag}</IonSelectOption>
         ))}
       </IonSelect>
+
       {/* List of entries from that day */}
       <EntryList entries={tagEntries} select={handleSelectEntry} />
-    </IonList>
+
+            {/* New entry button */}
+      <IonRow>
+        <IonCol id="footer">
+          <IonFab>
+            <IonFabButton id="roundButton" onClick={async () => {
+                await store.set('editMode', false)
+                await store.set('currEntry', {
+                  date: new Date().toISOString().substring(0,10),
+                  tags: [selectedTag],
+                  moods: []
+                })
+                reload()
+                history.push('/entry')
+              }}>
+            <IonIcon size="large" icon={add}/>
+            </IonFabButton>
+          </IonFab>
+        </IonCol>
+      </IonRow>
+    </div>
   )
 }
 

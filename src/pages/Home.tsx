@@ -9,11 +9,14 @@ import EntriesByTag from '../components/home/EntriesByTag'
 import SearchMenu from '../components/home/SearchMenu'
 import Calendar from '../components/home/Calendar'
 import Recents from '../components/home/Recents'
-import { IonPage, IonContent, IonHeader, IonIcon, IonButton, IonRow, IonCol, IonMenu, IonToolbar, IonTitle, IonFab, IonFabButton, IonSelect, IonSelectOption } from '@ionic/react'
+import { 
+  IonPage, IonContent, IonHeader, IonIcon, IonButton, 
+  IonRow, IonCol, IonMenu, IonToolbar, IonTitle, IonFab, 
+  IonFabButton, IonSelect, IonSelectOption } from '@ionic/react'
 import { menuController } from '@ionic/core/components'
 import { useAppContext } from '../contexts/AppContext'
 import { add, menu, search } from 'ionicons/icons'
-import { Entry, Mood } from '../types/Types.d'
+import { Entry } from '../types/Types.d'
 import { getEntries } from '../api/NotesApi'
 import { useEffect, useState } from 'react'
 import { useHistory } from 'react-router'
@@ -23,7 +26,7 @@ import EntriesByMood from '../components/home/EntriesByMood'
 
 const Home: React.FC = () => {
   const [entries, setEntries] = useState<Entry[]>([])
-  const [selectedView, setSelectedView] = useState<string>('Recents')
+  const [selectedView, setSelectedView] = useState<string>('recents')
 
   const { reload } = useAppContext()
 
@@ -117,15 +120,15 @@ const Home: React.FC = () => {
           </IonToolbar>
         </IonHeader>
         {/* Content */}
-        <IonContent fullscreen> 
+        <IonContent fullscreen>
+          {/* Select display type */}
           <IonRow>
             <IonCol>
-              <IonSelect 
+              <IonSelect
                 id="selector"
                 interface="popover"
                 value={selectedView}
                 onIonChange={(val) => setSelectedView(val.detail.value)}
-                defaultValue="recents"
               >
                 <IonSelectOption value="recents">Recents</IonSelectOption>
                 <IonSelectOption value="date">By Date</IonSelectOption>
@@ -135,7 +138,7 @@ const Home: React.FC = () => {
             </IonCol>
           </IonRow>
 
-          {/* Recents */}
+          {/* Display recents */}
           {
             selectedView === 'recents' && 
             <IonRow>
@@ -148,7 +151,7 @@ const Home: React.FC = () => {
             </IonRow>
           }
 
-          {/* By Date */}
+          {/* Display by date */}
           {
             selectedView === 'date' &&
             <div id="row">
@@ -159,7 +162,7 @@ const Home: React.FC = () => {
             </div>
           }
 
-          {/* By Tag */}
+          {/* Display by tag */}
           {
             selectedView === 'tag' && 
             <IonRow>
@@ -172,7 +175,7 @@ const Home: React.FC = () => {
             </IonRow>
           }
 
-          {/* By Mood */}
+          {/* Display by mood */}
           {
             selectedView === 'mood' && 
             <IonRow>
@@ -184,17 +187,6 @@ const Home: React.FC = () => {
               </IonCol>
             </IonRow>
           }
-
-          {/* Add note button */}
-          <IonRow>
-            <IonCol id="footer">
-              <IonFab>
-                <IonFabButton id="roundButton" onClick={handleAddEntry}>
-                <IonIcon size="large" icon={add}/>
-                </IonFabButton>
-              </IonFab>
-            </IonCol>
-          </IonRow>
         </IonContent>
       </IonPage>
     </IonContent>
