@@ -6,7 +6,8 @@
  * 2-6-2024
  */
 
-import { InputChangeEventDetail, IonActionSheet, IonButton, IonCard, IonCol, IonContent, IonFabButton, IonHeader, IonIcon, IonImg, IonMenu, IonModal, IonPage, IonRow, IonSelect, IonSelectOption, IonText, IonTextarea, IonToolbar, useIonLoading } from "@ionic/react"
+import { IonActionSheet, IonButton, IonCard, IonCol, IonContent, IonFabButton, IonHeader, IonIcon, IonImg, 
+  IonInput, IonMenu, IonModal, IonPage, IonRow, IonSelect, IonSelectOption, IonText, IonTextarea, IonToolbar, useIonLoading } from "@ionic/react"
 import { arrowBack, camera, close, menu, mic, save, trash } from "ionicons/icons"
 import { createEntry, deleteEntry, updateEntry } from '../api/NotesApi'
 import { usePhotoGallery, UserPhoto } from '../hooks/usePhotoGallery'
@@ -34,6 +35,7 @@ const NewNote: React.FC = () => {
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [entryId, setEntryId] = useState<number | undefined>()
+  const [entryDate, setEntryDate] = useState<string>('')
   const [presentLoading, dismissLoading] = useIonLoading()
 
   const [selectedMoods, setSelectedMoods] = useState<Mood[]>([])
@@ -63,6 +65,8 @@ const NewNote: React.FC = () => {
           setSelectedMoods(currEntry?.moods ?? [])
           setSelectedTags(currEntry?.tags ?? [])
           setIsEditMode(await store.get('editMode'))
+          if (currEntry.date)
+            setEntryDate((new Date(currEntry.date).toISOString().substring(0,10)))
         }
 
         // Retrive the tag names the user has created
@@ -90,24 +94,6 @@ const NewNote: React.FC = () => {
 
     getCurrEntry()
   }, [reload])
-
-  const changeTitle = (ev: CustomEvent<InputChangeEventDetail>) => {
-		const target = ev.target as HTMLIonInputElement | null
-
-		if (target) {
-			const val = target.value as string
-			setTitle(val)
-		}
-	}
-
-  const changeNewTag = (ev: CustomEvent<InputChangeEventDetail>) => {
-    const target = ev.target as HTMLIonInputElement | null
-
-    if (target) {
-      const val = target.value as string
-      setNewTag(val)
-    }
-  }
 
   const handleSaveTag = () => {
     if (newTag) {
@@ -144,7 +130,7 @@ const NewNote: React.FC = () => {
           userId,
           title,
           body,
-          date: new Date().toString(),
+          date: entryDate,
           tags: selectedTags,
           moods: selectedMoods,
           images: photos,
@@ -166,46 +152,31 @@ const NewNote: React.FC = () => {
     }
   }
 
-  /**
-   * @description When the selected moods change, update selectedMoods
-   * @param ev CustomEvent
-   */
-  const handleSelectMood = async (ev: CustomEvent) => {
-    try {
-      if (ev?.detail?.value) {
-        setSelectedMoods(ev.detail.value)
-      }
-    } catch (e) {
-      console.error(e)
-    }
-  }
-
-  /**
-   * @description When the selected moods change, update selectedMoods
-   * @param ev CustomEvent
-   */
-  const handleSelectTag = async (ev: CustomEvent) => {
-    try {
-      if (ev?.detail?.value) {
-        setSelectedTags(ev.detail.value)
-      }
-    } catch (e) {
-      console.error(e)
-    }
-  }
-
   return (
     <IonContent fullscreen scrollY={false}>
       {/* Menu */}
       <IonMenu menuId="entryMenu" contentId="main-content">
         {/* Delete entry */}
         <IonContent className="ion-padding">
+          {/* Date */}
+          <IonText>Date</IonText>
+          <div id="dateInput">
+            <IonInput
+              type="date"
+              fill="outline"
+              value={entryDate}
+              onIonInput={(ev) => {
+                setEntryDate(ev.detail.value ?? '')
+              }} 
+            />
+          </div>
+
           {/* Select Tags */}
           <IonText>Tags</IonText>
           <IonSelect 
             labelPlacement="floating" 
             interface="popover" 
-            onIonChange={handleSelectTag} 
+            onIonChange={(ev) => setSelectedTags(ev.detail.value ?? [])} 
             multiple={true}
             fill="outline"
             id="selector"
@@ -234,7 +205,7 @@ const NewNote: React.FC = () => {
             labelPlacement="floating"
             interface="popover" 
             multiple={true} 
-            onIonChange={handleSelectMood}
+            onIonChange={(ev) => setSelectedMoods(ev.detail.value ?? [])}
             fill="outline"
             id="selector"
           >
@@ -255,23 +226,25 @@ const NewNote: React.FC = () => {
         <IonHeader id="header">
           <IonToolbar>
             {/* Menu Button */}
-            <IonButton id="roundButton" onClick={handleBackButton}><IonIcon icon={arrowBack} /></IonButton>
-            {/* Menu Button */}
             <IonButton slot="start" id="roundButton" onClick={() => menuController.open('entryMenu')}><IonIcon icon={menu} /></IonButton>
+            {/* Menu Button */}
+            <IonButton id="roundButton" onClick={handleBackButton}><IonIcon icon={arrowBack} /></IonButton>
           </IonToolbar>
         </IonHeader>
 
         {/* Page content */}
         <IonContent id="entryPage">
           {/* Title*/}
-          <IonTextarea 
-            id="title"
-            value={title} 
-            onIonInput={changeTitle}
-            label="Title"
-            labelPlacement="floating"
-            fill="outline"
-          />
+          <div id="title">
+            <IonTextarea 
+              id="titleInput"
+              value={title}
+              onIonInput={(ev) => setTitle(ev.detail.value ?? '')}
+              label="Title"
+              labelPlacement="floating"
+              fill="outline"
+            />
+          </div>
 
           {/* Images */}
           <IonRow>
@@ -317,7 +290,7 @@ const NewNote: React.FC = () => {
           {/* Buttons */}
           <div id="footer">
             <IonFabButton onClick={() => takePhoto()}><IonIcon icon={camera} /></IonFabButton>
-            <IonFabButton id="recordButton" onClick={() => setIsRecording(true)}><IonIcon icon={mic} /></IonFabButton>
+            <IonFabButton onClick={() => setIsRecording(true)}><IonIcon icon={mic} /></IonFabButton>
             <IonFabButton onClick={handleSaveEntry}><IonIcon icon={save} /></IonFabButton>
           </div>
         </IonContent>
