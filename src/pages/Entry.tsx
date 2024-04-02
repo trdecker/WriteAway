@@ -1,16 +1,16 @@
 /**
  * @description Page to create or edit an entry. Users can edit the title, body, tags, moods, and date.
- * TODO: Edit date
  * @author Tad Decker
  * 
  * 2-6-2024
  */
 
-import { IonActionSheet, IonButton, IonCard, IonCol, IonContent, IonFabButton, IonHeader, IonIcon, IonImg, 
+import { IonActionSheet, IonButton, IonCard, IonCol, IonContent, IonFabButton, IonHeader, IonIcon, 
   IonInput, IonMenu, IonModal, IonPage, IonRow, IonSelect, IonSelectOption, IonText, IonTextarea, IonToolbar, useIonLoading } from "@ionic/react"
 import { arrowBack, camera, close, menu, mic, save, trash } from "ionicons/icons"
 import { createEntry, deleteEntry, updateEntry } from '../api/NotesApi'
 import { usePhotoGallery, UserPhoto } from '../hooks/usePhotoGallery'
+import PictureGrid from "../components/entry/PictureGrid"
 import { menuController } from '@ionic/core/components'
 import { Entry, Mood, TagItem } from '../types/Types.d'
 import { useAppContext } from '../contexts/AppContext'
@@ -41,7 +41,7 @@ const NewNote: React.FC = () => {
   const [selectedMoods, setSelectedMoods] = useState<Mood[]>([])
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [userTags, setUserTags] = useState<string[]>([])
-  const [newTag, setNewTag] = useState<string | undefined>(undefined)
+  const [newTag, _setNewTag] = useState<string | undefined>(undefined)
   const [isEditMode, setIsEditMode] = useState(false)
 
   const [markedDelete, setMarkedDelete] = useState(false)
@@ -105,6 +105,10 @@ const NewNote: React.FC = () => {
     }
   }
 
+  /**
+   * @function handleBackButton
+   * @description If the back button is pressed, reset all fields to null or empty.
+   */
   const handleBackButton = async () => {
     await store.set('editMode', false) // Set back to false
     setIsEditMode(false)
@@ -124,7 +128,6 @@ const NewNote: React.FC = () => {
       const userId = await store.get('userId')
 
       // Get a list of upload photos in the right format
-
       if (userId) {
         const entry: Entry = {
           userId,
@@ -153,7 +156,7 @@ const NewNote: React.FC = () => {
   }
 
   return (
-    <IonContent fullscreen scrollY={false}>
+    <IonContent fullscreen scrollY={true}>
       {/* Menu */}
       <IonMenu menuId="entryMenu" contentId="main-content">
         {/* Delete entry */}
@@ -248,15 +251,7 @@ const NewNote: React.FC = () => {
 
           {/* Images */}
           <IonRow>
-            {/* Images */}
-            {
-              photos.length > 0 ? 
-              photos.map((photo, index) => (
-                <IonCol size="6" key={index}>
-                  <IonImg onClick={() => setPhotoToDelete(photo)} src={photo.webviewPath} />
-                </IonCol>
-              )) : ''
-            }
+            <PictureGrid photos={photos} deletePhoto={deletePhoto}/>
           </IonRow>
 
           {/* Audio recordings */}
@@ -270,7 +265,6 @@ const NewNote: React.FC = () => {
                   // TODO: Make this less icky
                   onClick={() => {
                     const index = recordings.findIndex((val) => val.src === recording.src )
-                    console.log('yep')
                     recordings.splice(index, 1)
                   }}>
                   <IonIcon icon={trash} />
