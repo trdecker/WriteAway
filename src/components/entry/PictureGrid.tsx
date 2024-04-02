@@ -6,10 +6,11 @@
  * 3/29/2024
  */
 
-import { IonActionSheet, IonCol, IonFab, IonFabButton, IonIcon, IonImg, IonModal, IonRow } from "@ionic/react"
+import { IonActionSheet, IonCol, IonFab, IonFabButton, IonIcon, IonImg, IonModal, IonRow, IonThumbnail } from "@ionic/react"
 import { arrowBack, chevronBack, chevronForward, close, trash } from 'ionicons/icons'
 import { UserPhoto } from '../../hooks/usePhotoGallery'
 import { useState } from 'react'
+import './PictureGrid.css'
 
 type props = {
 	photos: UserPhoto[]
@@ -32,16 +33,32 @@ const PictureGrid: React.FC<props> = ({ photos, deletePhoto }) => {
 	}
 
 	return (
-	<div id="picture-grid">
+	<div>
 		{/* Images */}
-    <div>
+    <div id="images">
       {
         photos.length > 0 ? 
-        photos.map((photo, index) => (
-            <IonCol size="1" key={index}>
-              <IonImg onClick={() => viewPhoto(index)} src={photo.webviewPath} />
-            </IonCol>
-        )) : ''
+          photos.slice(0,3).map((photo, index) => (
+              <IonCol size="1" key={index}>
+                {/* Only show up to three images. On the last image, if there's even more, darken the image
+                and display a number of how many more images there are (ie, "+3") */}
+                {
+                  index < 3 ?
+                  <div id="image-wrapper">
+                    <IonThumbnail>
+                      <IonImg alt={photo.filepath} onClick={() => viewPhoto(index)} src={photo.webviewPath} />
+                    </IonThumbnail>
+                    {
+                      (photos.length > 3 && index === 2) ?
+                        <div id="overlay-image">+{photos.length-3}</div>
+                      : null
+                    }
+                  </div>
+                  : null
+                }
+              </IonCol>
+          ))
+        : null
       }
     </div>
 		<IonModal isOpen={viewingPhoto}>
