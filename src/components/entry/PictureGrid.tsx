@@ -3,14 +3,13 @@
  * @author Tad Decker
  * @description Display photos in a grid. If one is selected, display in full screen. Allow user to delete photos.
  * 
- * @todo: spacing, prettiness
  * 3/29/2024
  */
 
-import { usePhotoGallery, UserPhoto } from '../../hooks/usePhotoGallery'
-import { IonActionSheet, IonButton, IonButtons, IonCol, IonFab, IonFabButton, IonIcon, IonImg, IonModal, IonRow } from "@ionic/react"
+import { IonActionSheet, IonCol, IonFab, IonFabButton, IonIcon, IonImg, IonModal, IonRow } from "@ionic/react"
 import { arrowBack, chevronBack, chevronForward, close, trash } from 'ionicons/icons'
-import { useEffect, useRef, useState } from 'react'
+import { UserPhoto } from '../../hooks/usePhotoGallery'
+import { useState } from 'react'
 
 type props = {
 	photos: UserPhoto[]
@@ -35,15 +34,17 @@ const PictureGrid: React.FC<props> = ({ photos, deletePhoto }) => {
 	return (
 	<div id="picture-grid">
 		{/* Images */}
-		{
-			photos.length > 0 ? 
-			photos.map((photo, index) => (
-					<IonCol size="6" key={index}>
-					<IonImg onClick={() => viewPhoto(index)} src={photo.webviewPath} />
-					</IonCol>
-			)) : ''
-		}
-		<IonModal isOpen={viewingPhoto} id="modal">
+    <div>
+      {
+        photos.length > 0 ? 
+        photos.map((photo, index) => (
+            <IonCol size="1" key={index}>
+              <IonImg onClick={() => viewPhoto(index)} src={photo.webviewPath} />
+            </IonCol>
+        )) : ''
+      }
+    </div>
+		<IonModal isOpen={viewingPhoto}>
 			<IonRow>
 				<IonCol>
 					<IonFab>

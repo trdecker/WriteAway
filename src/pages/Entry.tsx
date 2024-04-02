@@ -5,27 +5,26 @@
  * 2-6-2024
  */
 
-import { IonActionSheet, IonButton, IonCard, IonCol, IonContent, IonFabButton, IonHeader, IonIcon, 
+import { IonActionSheet, IonButton, IonCard, IonContent, IonFabButton, IonHeader, IonIcon, 
   IonInput, IonMenu, IonModal, IonPage, IonRow, IonSelect, IonSelectOption, IonText, IonTextarea, IonToolbar, useIonLoading } from "@ionic/react"
 import { arrowBack, camera, close, menu, mic, save, trash } from "ionicons/icons"
 import { createEntry, deleteEntry, updateEntry } from '../api/NotesApi'
 import { usePhotoGallery, UserPhoto } from '../hooks/usePhotoGallery'
-import PictureGrid from "../components/entry/PictureGrid"
 import { menuController } from '@ionic/core/components'
 import { Entry, Mood, TagItem } from '../types/Types.d'
 import { useAppContext } from '../contexts/AppContext'
 import { useEffect, useRef, useState } from 'react'
 import { useHistory } from 'react-router'
 import { store } from '../../config'
+import AudioRecorder from "../components/entry/AudioRecorder"
+import PictureGrid from "../components/entry/PictureGrid"
+import ReactAudioPlayer from "react-audio-player"
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
-
 import './Entry.css'
-import ReactAudioPlayer from "react-audio-player"
-import AudioRecorder from "../components/entry/AudioRecorder"
 
 const NewNote: React.FC = () => {
-  const { photos, takePhoto, deletePhoto } = usePhotoGallery()
+  const { photos, takePhoto, deletePhoto, clearPhotos } = usePhotoGallery()
   const [photoToDelete, setPhotoToDelete] = useState<UserPhoto>()
 
   const [recordings, setRecordings] = useState<HTMLAudioElement[]>([])
@@ -119,9 +118,14 @@ const NewNote: React.FC = () => {
     setSelectedMoods([])
     setSelectedTags([])
     setEntryId(undefined)
+    clearPhotos()
     history.push('/home')
   }
 
+  /**
+   * @function handleSaveEntry
+   * @description If editing: save the changes. Else, create a new entry.
+   */
   const handleSaveEntry = async () => {
     try {
       await presentLoading()
@@ -224,6 +228,7 @@ const NewNote: React.FC = () => {
         </IonContent>
       </IonMenu>
 
+      {/* Page content */}
       <IonPage>
         {/* Header buttons */}
         <IonHeader id="header">
@@ -235,7 +240,7 @@ const NewNote: React.FC = () => {
           </IonToolbar>
         </IonHeader>
 
-        {/* Page content */}
+        {/* Editable fields */}
         <IonContent id="entryPage">
           {/* Title*/}
           <div id="title">
@@ -250,7 +255,7 @@ const NewNote: React.FC = () => {
           </div>
 
           {/* Images */}
-          <IonRow>
+          <IonRow id="picture-grid">
             <PictureGrid photos={photos} deletePhoto={deletePhoto}/>
           </IonRow>
 
