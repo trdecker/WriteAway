@@ -7,11 +7,12 @@
  */
 
 import { InputChangeEventDetail, IonButton, IonCol, IonContent, IonImg, IonInput, IonPage, IonRow, useIonLoading} from "@ionic/react"
-import './Login.css'
-import { useState } from 'react'
+import { useAppContext } from '../contexts/AppContext'
 import { login, signup } from '../../src/api/UsersApi'
-import { store } from "../../config"
 import { useHistory } from "react-router"
+import { store } from "../../config"
+import { useState } from 'react'
+import './Login.css'
 
 const Login: React.FC = () => {
 	const [username, setUsername] = useState('')
@@ -19,6 +20,7 @@ const Login: React.FC = () => {
 
 	const history = useHistory()
 	const [presentLoading, dismissLoading] = useIonLoading()
+	const { reload } = useAppContext()
 
 	const changeUsername = (ev: CustomEvent<InputChangeEventDetail>) => {
 		const target = ev.target as HTMLIonInputElement | null
@@ -54,6 +56,7 @@ const Login: React.FC = () => {
 		} catch (e) {
 			console.error('Error logging in.', e)
 		} finally {
+			reload()
 			await dismissLoading()
 		}
 	}
@@ -74,6 +77,7 @@ const Login: React.FC = () => {
 		} catch (e) {
 			console.error(e)
 		} finally {
+			reload()
 			await dismissLoading()
 		}
 	}
