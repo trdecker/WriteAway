@@ -23,7 +23,6 @@ export interface UserPhoto {
 
 const PHOTO_STORAGE = 'photos'
 
-
 /**
  * @param path {string}
  * @description The base64FromPath method is a helper 

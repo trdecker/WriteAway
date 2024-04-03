@@ -118,7 +118,7 @@ const NewNote: React.FC = () => {
     setSelectedMoods([])
     setSelectedTags([])
     setEntryId(undefined)
-    clearPhotos()
+    await clearPhotos()
     history.push('/home')
   }
 
@@ -264,11 +264,14 @@ const NewNote: React.FC = () => {
               <ReactAudioPlayer src={recording.src} controls />
               <IonFabButton 
                 // When selected, remove delete the recording.
-                // How do I get this to run faster?
+                // FIXME: How do I get this to run faster?
                 // TODO: Make this less icky
                 onClick={() => {
+                  presentLoading()
+                  console.log('deleting recording')
                   const index = recordings.findIndex((val) => val.src === recording.src )
                   recordings.splice(index, 1)
+                  dismissLoading()
                 }}>
                 <IonIcon icon={trash} />
               </IonFabButton>
@@ -359,17 +362,15 @@ const NewNote: React.FC = () => {
         onDidDismiss={() => setIsRecording(false)}
       >
         <IonContent>
-          <IonCard>
-            <AudioRecorder 
-              // Close the modal
-              cancel={() => setIsRecording(false)} 
-              // Add the recording to recordings, and close the modal
-              save={(recording: HTMLAudioElement) => {
-                setRecordings([...recordings, recording])
-                setIsRecording(false)
-              }}
-            />
-          </IonCard>
+          <AudioRecorder
+            // Close the modal
+            cancel={() => setIsRecording(false)}
+            // Add the recording to recordings, and close the modal
+            save={(recording: HTMLAudioElement) => {
+              setRecordings([...recordings, recording])
+              setIsRecording(false)
+            }}
+          />
         </IonContent>
       </IonModal>
     </IonPage>
