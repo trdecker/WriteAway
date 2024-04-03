@@ -31,11 +31,10 @@
 }
 
 #body {
-  height: 30%;
-  margin: 0 24px 52px 24px;
+  margin: 0 24px 16px 24px;
 }
 
-ion-modal#recording-modal {
+ion-modal #recording-modal {
   --border-radius: 16px;
   --box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
@@ -44,8 +43,5 @@ ion-modal#recording-modal {
   display: flex;
   flex-direction: row;
   justify-content: space-evenly;
-}
-
-#picture-grid {
-  margin: 0 12px
+  padding: 20px 0 20px 0
 }

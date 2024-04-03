@@ -5,7 +5,7 @@
  * 2-6-2024
  */
 
-import { IonActionSheet, IonButton, IonCard, IonContent, IonFabButton, IonHeader, IonIcon, 
+import { IonActionSheet, IonButton, IonCard, IonContent, IonFabButton, IonFooter, IonHeader, IonIcon, 
   IonInput, IonMenu, IonModal, IonPage, IonRow, IonSelect, IonSelectOption, IonText, IonTextarea, IonToolbar, useIonLoading } from "@ionic/react"
 import { arrowBack, camera, close, menu, mic, save, trash } from "ionicons/icons"
 import { createEntry, deleteEntry, updateEntry } from '../api/NotesApi'
@@ -160,7 +160,7 @@ const NewNote: React.FC = () => {
   }
 
   return (
-    <IonContent fullscreen scrollY={true}>
+    <IonPage>
       {/* Menu */}
       <IonMenu menuId="entryMenu" contentId="main-content">
         {/* Delete entry */}
@@ -228,153 +228,151 @@ const NewNote: React.FC = () => {
         </IonContent>
       </IonMenu>
 
-      {/* Page content */}
-      <IonPage>
-        {/* Header buttons */}
-        <IonHeader id="header">
-          <IonToolbar>
-            {/* Menu Button */}
-            <IonButton slot="start" id="roundButton" onClick={() => menuController.open('entryMenu')}><IonIcon icon={menu} /></IonButton>
-            {/* Menu Button */}
-            <IonButton id="roundButton" onClick={handleBackButton}><IonIcon icon={arrowBack} /></IonButton>
-          </IonToolbar>
-        </IonHeader>
+      {/* Header buttons */}
+      <IonHeader id="header">
+        <IonToolbar>
+          {/* Menu Button */}
+          <IonButton slot="start" id="roundButton" onClick={() => menuController.open('entryMenu')}><IonIcon icon={menu} /></IonButton>
+          {/* Menu Button */}
+          <IonButton id="roundButton" onClick={handleBackButton}><IonIcon icon={arrowBack} /></IonButton>
+        </IonToolbar>
+      </IonHeader>
 
-        {/* Editable fields */}
-        <IonContent id="entryPage">
-          {/* Title*/}
-          <div id="title">
-            <IonTextarea 
-              id="titleInput"
-              value={title}
-              onIonInput={(ev) => setTitle(ev.detail.value ?? '')}
-              label="Title"
-              labelPlacement="floating"
-              fill="outline"
-            />
-          </div>
-
-          {/* Images */}
-          <IonRow id="picture-grid">
-            <PictureGrid photos={photos} deletePhoto={deletePhoto}/>
-          </IonRow>
-
-          {/* Audio recordings */}
-          {
-            recordings.map(recording => 
-              <IonRow key={recording.src}>
-                <ReactAudioPlayer src={recording.src} controls />
-                <IonFabButton 
-                  // When selected, remove delete the recording.
-                  // How do I get this to run faster?
-                  // TODO: Make this less icky
-                  onClick={() => {
-                    const index = recordings.findIndex((val) => val.src === recording.src )
-                    recordings.splice(index, 1)
-                  }}>
-                  <IonIcon icon={trash} />
-                </IonFabButton>
-              </IonRow>
-            )
-          }
-
-          {/* Body rich text editor */}
-          <ReactQuill 
-            id="body"
-            theme="snow" 
-            value={body} 
-            onChange={setBody}
+      {/* Editable fields */}
+      <IonContent id="entryPage">
+        {/* Title*/}
+        <div id="title">
+          <IonTextarea 
+            id="titleInput"
+            value={title}
+            onIonInput={(ev) => setTitle(ev.detail.value ?? '')}
+            label="Title"
+            labelPlacement="floating"
+            fill="outline"
           />
+        </div>
 
-          {/* Buttons */}
-          <div id="footer">
-            <IonFabButton onClick={() => takePhoto()}><IonIcon icon={camera} /></IonFabButton>
-            <IonFabButton onClick={() => setIsRecording(true)}><IonIcon icon={mic} /></IonFabButton>
-            <IonFabButton onClick={handleSaveEntry}><IonIcon icon={save} /></IonFabButton>
-          </div>
+        {/* Images */}
+        <IonRow id="picture-grid">
+          <PictureGrid photos={photos} deletePhoto={deletePhoto}/>
+        </IonRow>
+
+        {/* Audio recordings */}
+        {
+          recordings.map(recording => 
+            <IonRow key={recording.src}>
+              <ReactAudioPlayer src={recording.src} controls />
+              <IonFabButton 
+                // When selected, remove delete the recording.
+                // How do I get this to run faster?
+                // TODO: Make this less icky
+                onClick={() => {
+                  const index = recordings.findIndex((val) => val.src === recording.src )
+                  recordings.splice(index, 1)
+                }}>
+                <IonIcon icon={trash} />
+              </IonFabButton>
+            </IonRow>
+          )
+        }
+
+        {/* Body rich text editor */}
+        <ReactQuill 
+          id="body"
+          theme="snow" 
+          value={body} 
+          onChange={setBody}
+        />
+
+      </IonContent>
+      
+      {/* Buttons */}
+      <IonFooter id="footer" collapse="fade">
+        <IonFabButton onClick={() => takePhoto()}><IonIcon icon={camera} /></IonFabButton>
+        <IonFabButton onClick={() => setIsRecording(true)}><IonIcon icon={mic} /></IonFabButton>
+        <IonFabButton onClick={handleSaveEntry}><IonIcon icon={save} /></IonFabButton>
+      </IonFooter>
+
+      {/* Delete photo confirmation message */}
+      <IonActionSheet
+        isOpen={!!photoToDelete}
+        buttons={[
+          {
+            text: 'Delete',
+            role: 'destructive',
+            icon: trash,
+            handler: () => {
+              if (photoToDelete) {
+                deletePhoto(photoToDelete);
+                setPhotoToDelete(undefined);
+              }
+            },
+          },
+          {
+            text: 'Cancel',
+            icon: close,
+            role: 'cancel', // What does "role" mean?
+          },
+        ]}
+        onDidDismiss={() => setPhotoToDelete(undefined)}
+      />
+
+      {/* Delete entry confirmation message */}
+      <IonActionSheet
+        isOpen={markedDelete}
+        header={'Are you sure you want ' + (isEditMode ? 'to cancel?' : 'to delete this entry?')}
+        buttons={[
+          {
+            text: 'Yes',
+            role: 'destructive',
+            icon: trash,
+            handler: async () => {
+              presentLoading()
+
+              // If editing an existing item, delete from database
+              if (!isEditMode) {
+                const userId = await store.get('userId')
+                if (entryId && userId) {
+                  await deleteEntry(userId, entryId.toString())
+                }
+              }
+              await handleBackButton()
+              dismissLoading()
+            },
+          },
+          {
+            text: 'Cancel',
+            icon: close,
+            role: 'cancel'
+          },
+        ]}
+        onDidDismiss={() => setMarkedDelete(false)}
+      />
+
+      {/* Recording Modal */}
+      <IonModal
+        id="recording-modal"
+        ref={recordingModal}
+        isOpen={isRecording}
+        // onWillDismiss={(ev) => onWill(ev)}
+        initialBreakpoint={0.95}
+        onDidDismiss={() => setIsRecording(false)}
+      >
+        <IonContent>
+          <IonCard>
+            <AudioRecorder 
+              // Close the modal
+              cancel={() => setIsRecording(false)} 
+              // Add the recording to recordings, and close the modal
+              save={(recording: HTMLAudioElement) => {
+                setRecordings([...recordings, recording])
+                setIsRecording(false)
+              }}
+            />
+          </IonCard>
         </IonContent>
-
-        {/* Delete photo confirmation message */}
-        <IonActionSheet
-          isOpen={!!photoToDelete}
-          buttons={[
-            {
-              text: 'Delete',
-              role: 'destructive',
-              icon: trash,
-              handler: () => {
-                if (photoToDelete) {
-                  deletePhoto(photoToDelete);
-                  setPhotoToDelete(undefined);
-                }
-              },
-            },
-            {
-              text: 'Cancel',
-              icon: close,
-              role: 'cancel', // What does "role" mean?
-            },
-          ]}
-          onDidDismiss={() => setPhotoToDelete(undefined)}
-        />
-
-        {/* Delete entry confirmation message */}
-        <IonActionSheet
-          isOpen={markedDelete}
-          header={'Are you sure you want ' + (isEditMode ? 'to cancel?' : 'to delete this entry?')}
-          buttons={[
-            {
-              text: 'Yes',
-              role: 'destructive',
-              icon: trash,
-              handler: async () => {
-                presentLoading()
-
-                // If editing an existing item, delete from database
-                if (!isEditMode) {
-                  const userId = await store.get('userId')
-                  if (entryId && userId) {
-                    await deleteEntry(userId, entryId.toString())
-                  }
-                }
-                await handleBackButton()
-                dismissLoading()
-              },
-            },
-            {
-              text: 'Cancel',
-              icon: close,
-              role: 'cancel'
-            },
-          ]}
-          onDidDismiss={() => setMarkedDelete(false)}
-        />
-
-        {/* Recording Modal */}
-        <IonModal
-          id="recording-modal"
-          ref={recordingModal}
-          isOpen={isRecording}
-          // onWillDismiss={(ev) => onWill(ev)}
-          initialBreakpoint={0.95}
-          onDidDismiss={() => setIsRecording(false)}
-        >
-          <IonContent>
-            <IonCard>
-              <AudioRecorder 
-                // Close the modal
-                cancel={() => setIsRecording(false)} 
-                // Add the recording to recordings, and close the modal
-                save={(recording: HTMLAudioElement) => {
-                  setRecordings([...recordings, recording])
-                  setIsRecording(false)
-                }}
-              />
-            </IonCard>
-          </IonContent>
-        </IonModal>
-      </IonPage>
-    </IonContent>
+      </IonModal>
+    </IonPage>
   )
 }
 

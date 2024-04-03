@@ -137,7 +137,7 @@ export function usePhotoGallery() {
 
 		const fileName = Date.now() + '.jpeg'
 		const savedFileImage = await savePicture(photo, fileName)
-		const newPhotos = [savedFileImage, ...photos]
+		const newPhotos = [...photos, savedFileImage ]
 		setPhotos(newPhotos)
 
 		// TODO: Will I need this?

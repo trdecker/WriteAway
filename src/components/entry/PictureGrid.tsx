@@ -61,14 +61,18 @@ const PictureGrid: React.FC<props> = ({ photos, deletePhoto }) => {
         : null
       }
     </div>
+
+    {/* Photo viewing modal */}
 		<IonModal isOpen={viewingPhoto}>
 			<IonRow>
-				<IonCol>
+        {/* Back button */}
+				<IonCol id="button-left">
 					<IonFab>
 						<IonFabButton onClick={closePhoto}><IonIcon icon={arrowBack} /></IonFabButton>
 					</IonFab>
 				</IonCol>
-				<IonCol>
+        {/* Delete button */}
+				<IonCol id="button-right">
 					<IonFab>
 						<IonFabButton onClick={() => {
 							if (photoIndex !== undefined) {
@@ -88,10 +92,9 @@ const PictureGrid: React.FC<props> = ({ photos, deletePhoto }) => {
 			}
 
 			{/* Forward/back chevrons */}
-			{/* TODO: Put these on the photo! */}
 			<IonRow>
         {/* Left chevron. Only display if NOT first item in list */}
-        <IonCol>
+        <IonCol id="button-left">
           {
             photoIndex > 0 ?
               <IonFabButton onClick={() => viewPhoto(photoIndex-1)}>
@@ -101,7 +104,7 @@ const PictureGrid: React.FC<props> = ({ photos, deletePhoto }) => {
           }
         </IonCol>
         {/* Right chevron. Only display if NOT the last item in list */}
-				<IonCol>
+				<IonCol id="button-right">
           {
             photoIndex < photos.length-1 ?
 						  <IonFabButton onClick={() => viewPhoto(photoIndex+1)}>
@@ -126,7 +129,10 @@ const PictureGrid: React.FC<props> = ({ photos, deletePhoto }) => {
 						if (photoToDelete) {
 							deletePhoto(photoToDelete)
 							setPhotoToDelete(undefined)
-							setViewingPhoto(false)
+              // If the photo was the last in the list, lower the photo index.
+              if (photoIndex === photos.length-1) {
+                setPhotoIndex(photoIndex-1)
+              }
 						}
 					},
 				},

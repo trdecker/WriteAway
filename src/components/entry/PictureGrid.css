@@ -3,6 +3,10 @@ ion-thumbnail {
   --border-radius: 14px;
 }
 
+ion-fab-button {
+  --box-shadow: 0
+}
+
 #images {
   display: flex;
   flex-direction: row;
@@ -17,4 +21,18 @@ ion-thumbnail {
   position: absolute;
   top: 60px;
   left: 60px;
+}
+
+#button-left {
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  margin: 16px;
+}
+
+#button-right {
+  display: flex;
+  flex-direction: row;
+  justify-content: end;
+  margin: 16px;
 }
