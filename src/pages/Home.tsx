@@ -5,28 +5,29 @@
  * 2-6-2024
  */
 
+import EntriesByMood from '../components/home/EntriesByMood'
 import EntriesByTag from '../components/home/EntriesByTag'
 import SearchMenu from '../components/home/SearchMenu'
 import Calendar from '../components/home/Calendar'
 import Recents from '../components/home/Recents'
 import { 
   IonPage, IonContent, IonHeader, IonIcon, IonButton, 
-  IonRow, IonCol, IonMenu, IonToolbar, IonTitle, IonFab, 
-  IonFabButton, IonSelect, IonSelectOption } from '@ionic/react'
+  IonRow, IonCol, IonMenu, IonToolbar, IonTitle,
+  IonSelect, IonSelectOption, useIonLoading } from '@ionic/react'
 import { menuController } from '@ionic/core/components'
 import { useAppContext } from '../contexts/AppContext'
-import { add, menu, search } from 'ionicons/icons'
+import { menu, search } from 'ionicons/icons'
 import { Entry } from '../types/Types.d'
 import { getEntries } from '../api/NotesApi'
 import { useEffect, useState } from 'react'
 import { useHistory } from 'react-router'
 import { store } from '../../config'
 import './Home.css'
-import EntriesByMood from '../components/home/EntriesByMood'
 
 const Home: React.FC = () => {
   const [entries, setEntries] = useState<Entry[]>([])
   const [selectedView, setSelectedView] = useState<string>('recents')
+  const [presentLoading, dismissLoading] = useIonLoading()
 
   const { reload } = useAppContext()
 
@@ -59,6 +60,8 @@ const Home: React.FC = () => {
     await store.set('userId', '')
     await store.set('authToken', '')
     await menuController.close('mainMenu')
+    setEntries([])
+    setSelectedView('recents')
     history.push('/login')
   }
 

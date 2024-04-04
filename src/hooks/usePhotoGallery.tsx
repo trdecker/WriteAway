@@ -1,9 +1,19 @@
-import { useState, useEffect } from 'react'
-import { isPlatform } from '@ionic/react'
+/**
+ * @file usePhotoGallery.tsx
+ * @description functions to take and remove photos.
+ * 
+ * @author Tad Decker
+ * @todo Images saved in backend, retrieve images when loading entry
+ * @todo Images being saved locally? Change that?
+ * Updated 4-2-2024
+ */
+
 import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera'
 import { Filesystem, Directory } from '@capacitor/filesystem'
 import { Preferences } from '@capacitor/preferences'
 import { Capacitor } from '@capacitor/core'
+import { isPlatform } from '@ionic/react'
+import { useState } from 'react'
 
 export interface UserPhoto {
     filepath: string
@@ -12,7 +22,6 @@ export interface UserPhoto {
 }
 
 const PHOTO_STORAGE = 'photos'
-
 
 /**
  * @param path {string}
@@ -43,9 +52,10 @@ export async function base64FromPath(path: string): Promise<String> {
  * on rendering that creates a function (takePhoto) and an array
  * (photos).
  * 
- * Additionally, the function loads all the saved photos immediately
- * in the function loadSaved, which exists within a useEffect hook
- * (meaning it will render immediately when the usePhotoGallery)
+ * @function savePicture
+ * @function takePhoto
+ * @function deletePhoto
+ * @function clearPhotos
  * @returns takePhoto, photos
  */
 export function usePhotoGallery() {
@@ -55,6 +65,7 @@ export function usePhotoGallery() {
 	 * Get the base64data from the photo, then save the photo the capacitor Filesystem.
 	 * @param photo {Photo}
 	 * @param fileName {string}
+	 * @todo Don't want to save these locally!
 	 * @returns newImage {UserPhoto}
 	 */
 	const savePicture = async (photo: Photo, fileName: string): Promise<UserPhoto> => {
@@ -125,37 +136,27 @@ export function usePhotoGallery() {
 
 		const fileName = Date.now() + '.jpeg'
 		const savedFileImage = await savePicture(photo, fileName)
-		const newPhotos = [savedFileImage, ...photos]
+		const newPhotos = [...photos, savedFileImage ]
 		setPhotos(newPhotos)
 
 		// TODO: Will I need this?
 		// Preferences.set({ key: PHOTO_STORAGE, value: JSON.stringify(newPhotos) })
 	}
 
-	useEffect(() => {
-		const loadSaved = async () => {
-				const { value } = await Preferences.get({ key: PHOTO_STORAGE })
-
-				const photosInPreferences = (value ? JSON.parse(value) : []) as UserPhoto[]
-				// For mobile, we can directly get each photo file on the Filesystem.
-				// For web, we have to read each image into base64.
-				if (!isPlatform('hybrid')) {
-						for (let photo of photosInPreferences) {
-								const file = await Filesystem.readFile({
-										path: photo.filepath,
-										directory: Directory.Data
-								})
-								photo.webviewPath = `data:image/jpeg;base64,${file.data}`
-						}
-				}
-				setPhotos(photosInPreferences)
+	/**
+	 * @function clearPhotos
+	 * @description Clear the photo gallery of all photos.
+	 */
+	const clearPhotos = async () => {
+		for (const photo of photos) {
+			deletePhoto(photo)
 		}
-		// loadSaved()
-	}, [])
+	}
 
     return {
 			takePhoto,
 			deletePhoto,
+			clearPhotos,
 			photos
     }
 }
