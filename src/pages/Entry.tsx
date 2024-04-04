@@ -260,12 +260,13 @@ const NewNote: React.FC = () => {
         {/* Audio recordings */}
         {
           recordings.map(recording => 
-            <IonRow key={recording.src}>
+            <IonRow id="audio-recording" key={recording.src}>
               <ReactAudioPlayer src={recording.src} controls />
-              <IonFabButton 
+              <IonFabButton
+                id="delete-recording-button"
                 // When selected, remove delete the recording.
                 // FIXME: How do I get this to run faster?
-                // TODO: Make this less icky
+                // TODO: Make a confirmation action sheet
                 onClick={() => {
                   presentLoading()
                   console.log('deleting recording')
