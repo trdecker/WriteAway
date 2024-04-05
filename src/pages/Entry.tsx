@@ -5,14 +5,15 @@
  * 2-6-2024
  */
 
-import { IonActionSheet, IonButton, IonCard, IonContent, IonFabButton, IonFooter, IonHeader, IonIcon, 
+import { IonActionSheet, IonButton, IonContent, IonFabButton, IonFooter, IonHeader, IonIcon, 
   IonInput, IonMenu, IonModal, IonPage, IonRow, IonSelect, IonSelectOption, IonText, IonTextarea, IonToolbar, useIonLoading } from "@ionic/react"
 import { arrowBack, camera, close, menu, mic, save, trash } from "ionicons/icons"
 import { createEntry, deleteEntry, updateEntry } from '../api/NotesApi'
 import { usePhotoGallery, UserPhoto } from '../hooks/usePhotoGallery'
 import { menuController } from '@ionic/core/components'
-import { Entry, Mood, TagItem } from '../types/Types.d'
+import { Entry, Mood, RecordingItem, TagItem } from '../types/Types.d'
 import { useAppContext } from '../contexts/AppContext'
+import { generateId } from "../utils/common"
 import { useEffect, useRef, useState } from 'react'
 import { useHistory } from 'react-router'
 import { store } from '../../config'
@@ -27,8 +28,8 @@ const NewNote: React.FC = () => {
   const { photos, takePhoto, deletePhoto, clearPhotos } = usePhotoGallery()
   const [photoToDelete, setPhotoToDelete] = useState<UserPhoto>()
 
-  const [recordings, setRecordings] = useState<HTMLAudioElement[]>([])
-  const [isRecording, setIsRecording] = useState(false)
+  const [recordings, setRecordings] = useState<RecordingItem[]>([])
+  const [isRecording, setIsRecording] = useState<boolean>(false)
   const recordingModal = useRef<HTMLIonModalElement>(null)
 
   const [title, setTitle] = useState('')
@@ -41,9 +42,10 @@ const NewNote: React.FC = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [userTags, setUserTags] = useState<string[]>([])
   const [newTag, _setNewTag] = useState<string | undefined>(undefined)
-  const [isEditMode, setIsEditMode] = useState(false)
+  const [isEditMode, setIsEditMode] = useState<boolean>(false)
 
-  const [markedDelete, setMarkedDelete] = useState(false)
+  const [markedDelete, setMarkedDelete] = useState<boolean>(false)
+  const [audioToDelete, setAudioToDelete] = useState<string>()
 
   const { reload } = useAppContext()
 
@@ -117,6 +119,7 @@ const NewNote: React.FC = () => {
     setBody('')
     setSelectedMoods([])
     setSelectedTags([])
+    setRecordings([])
     setEntryId(undefined)
     await clearPhotos()
     history.push('/home')
@@ -259,21 +262,16 @@ const NewNote: React.FC = () => {
 
         {/* Audio recordings */}
         {
-          recordings.map(recording => 
-            <IonRow id="audio-recording" key={recording.src}>
-              <ReactAudioPlayer src={recording.src} controls />
+          recordings.map(recording =>
+            <IonRow id="audio-recording" key={recording.recording.src}>
+              {recording.recordingId}
+              <ReactAudioPlayer src={recording.recording.src} controls />
               <IonFabButton
                 id="delete-recording-button"
+                color="danger"
                 // When selected, remove delete the recording.
                 // FIXME: How do I get this to run faster?
-                // TODO: Make a confirmation action sheet
-                onClick={() => {
-                  presentLoading()
-                  console.log('deleting recording')
-                  const index = recordings.findIndex((val) => val.src === recording.src )
-                  recordings.splice(index, 1)
-                  dismissLoading()
-                }}>
+                onClick={() => setAudioToDelete(recording.recordingId)}>
                 <IonIcon icon={trash} />
               </IonFabButton>
             </IonRow>
@@ -284,8 +282,9 @@ const NewNote: React.FC = () => {
         <ReactQuill 
           id="body"
           theme="snow" 
-          value={body} 
+          value={body}
           onChange={setBody}
+          preserveWhitespace
         />
 
       </IonContent>
@@ -307,8 +306,8 @@ const NewNote: React.FC = () => {
             icon: trash,
             handler: () => {
               if (photoToDelete) {
-                deletePhoto(photoToDelete);
-                setPhotoToDelete(undefined);
+                deletePhoto(photoToDelete)
+                setPhotoToDelete(undefined)
               }
             },
           },
@@ -353,6 +352,36 @@ const NewNote: React.FC = () => {
         onDidDismiss={() => setMarkedDelete(false)}
       />
 
+      {/* Delete audio recording confirmation message */}
+      <IonActionSheet
+        isOpen={!!audioToDelete}
+        buttons={[
+          {
+            text: 'Delete audio',
+            role: 'destructive',
+            icon: trash,
+            handler: () => {
+              // Delete the audio!
+              if (audioToDelete) {
+                const index = recordings.findIndex((recording) => recording.recordingId === audioToDelete )
+                if (index > -1)  {
+                  const newRecordings = recordings.filter(function(item) {
+                    return item.recordingId !== audioToDelete
+                  })
+                  setRecordings(newRecordings)
+                }
+              }
+            },
+          },
+          {
+            text: 'Cancel',
+            icon: close,
+            role: 'cancel',
+          },
+        ]}
+        onDidDismiss={() => setAudioToDelete(undefined)}
+      />
+
       {/* Recording Modal */}
       <IonModal
         id="recording-modal"
@@ -368,7 +397,12 @@ const NewNote: React.FC = () => {
             cancel={() => setIsRecording(false)}
             // Add the recording to recordings, and close the modal
             save={(recording: HTMLAudioElement) => {
-              setRecordings([...recordings, recording])
+              const recordingId: string = 'REC' + generateId().toString()
+              const recordingItem: RecordingItem = {
+                recordingId,
+                recording
+              }
+              setRecordings([...recordings, recordingItem])
               setIsRecording(false)
             }}
           />

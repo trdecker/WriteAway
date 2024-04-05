@@ -6,7 +6,7 @@
  * 2/26/2024
  */
 
-import { IonButton, IonIcon, IonRow, IonText } from "@ionic/react"
+import { IonButton, IonIcon, IonRow, useIonLoading } from "@ionic/react"
 import { VoiceRecorder } from "capacitor-voice-recorder"
 import { closeOutline, mic, pause, stop } from "ionicons/icons"
 import { useEffect, useState } from "react"
@@ -22,6 +22,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ cancel, save}) => {
   const [recordingStatus, setRecordingStatus] = useState<string>('NONE')
   const [buttonIcon,  setButtonicon] = useState<string>('')
   const [recording, setRecording] = useState<HTMLAudioElement | undefined>()
+  const [presentLoading, dismissLoading] = useIonLoading()
 
   useEffect(() => {
     if (recordingStatus === 'NONE')
@@ -34,14 +35,20 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ cancel, save}) => {
   }, [recordingStatus])
 
   const startRecording = async () => {
-    if (await VoiceRecorder.hasAudioRecordingPermission()) {      
-      if (recordingStatus == 'NONE') {
+    const permission = await VoiceRecorder.requestAudioRecordingPermission()
+    if (permission && recordingStatus === 'NONE') {    
+      try {
+        // presentLoading()
         console.log('starting...')
         setRecording(undefined)
-        VoiceRecorder.startRecording()
+        await VoiceRecorder.startRecording()
         setRecordingStatus('RECORDING')
+        console.log('Recording!')
+      } catch (e) {
+        console.error(e)
+      } finally {
         // dismissLoading()
-      }    
+      }
     }
   }
   
@@ -145,7 +152,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ cancel, save}) => {
         {
           recording?.src && recordingStatus === 'NONE' ?
             <ReactAudioPlayer src={recording?.src} controls /> 
-          : null
+          : <div id="hidden-audio-player"></div>
         }
       </IonRow>
     </div>

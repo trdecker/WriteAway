@@ -35,7 +35,8 @@
 }
 
 #audio-recording {
-  margin: 8px 0 12px 24px
+  margin: 8px 0 12px 24px;
+  width: 100%;
 }
 
 #delete-recording-button {
