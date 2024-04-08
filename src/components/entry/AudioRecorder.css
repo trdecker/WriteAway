@@ -3,6 +3,8 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    height: 100%;
+    padding-bottom: 100px
 }
 
 #close-button {
@@ -25,6 +27,11 @@
 #recording-button {
     display: flex;
     justify-content: center;
+}
+
+/* This is hacky, but it works */
+#hidden-audio-player {
+    height: 54px
 }
 
 ion-button[shape=circle] {

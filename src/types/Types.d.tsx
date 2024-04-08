@@ -23,8 +23,6 @@ export type Entry = {
   audio: any[]
 }
 
-// 
-// 
 /**
  * This is how items in the "tags" selector in Entry.tsx will appear.
  * Eventually I'd like the user to be able to add new tags, which is why they
@@ -34,6 +32,11 @@ export type Entry = {
 export type TagItem = {
   name: string,
   id: number
+}
+
+export type RecordingItem = {
+  recording: HTMLAudioElement,
+  recordingId: string
 }
 
 export interface InputCustomEvent extends CustomEvent {

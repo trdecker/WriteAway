@@ -13,7 +13,7 @@ import Recents from '../components/home/Recents'
 import { 
   IonPage, IonContent, IonHeader, IonIcon, IonButton, 
   IonRow, IonCol, IonMenu, IonToolbar, IonTitle,
-  IonSelect, IonSelectOption, useIonLoading } from '@ionic/react'
+  IonSelect, IonSelectOption } from '@ionic/react'
 import { menuController } from '@ionic/core/components'
 import { useAppContext } from '../contexts/AppContext'
 import { menu, search } from 'ionicons/icons'
@@ -27,7 +27,6 @@ import './Home.css'
 const Home: React.FC = () => {
   const [entries, setEntries] = useState<Entry[]>([])
   const [selectedView, setSelectedView] = useState<string>('recents')
-  const [presentLoading, dismissLoading] = useIonLoading()
 
   const { reload } = useAppContext()
 
@@ -63,13 +62,6 @@ const Home: React.FC = () => {
     setEntries([])
     setSelectedView('recents')
     history.push('/login')
-  }
-
-  const handleAddEntry = async () => {
-    await store.set('editMode', false)
-    await store.set('currEntry', null)
-    reload()
-    history.push('/entry')
   }
 
   const handleSelectEntry = async (entry: Entry) => {

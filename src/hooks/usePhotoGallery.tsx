@@ -3,8 +3,7 @@
  * @description functions to take and remove photos.
  * 
  * @author Tad Decker
- * @todo Images saved in backend, retrieve images when loading entry
- * @todo Images being saved locally? Change that?
+ * @fixme Images being saved locally? Change that?
  * Updated 4-2-2024
  */
 

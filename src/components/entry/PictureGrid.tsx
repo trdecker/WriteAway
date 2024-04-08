@@ -126,13 +126,18 @@ const PictureGrid: React.FC<props> = ({ photos, deletePhoto }) => {
 					role: 'destructive',
 					icon: trash,
 					handler: () => {
+						const length = photos.length
 						if (photoToDelete) {
 							deletePhoto(photoToDelete)
 							setPhotoToDelete(undefined)
+							// If there was only one photo, close the modal.
+              if (length === 1) {
+								setViewingPhoto(false)
+							}
               // If the photo was the last in the list, lower the photo index.
-              if (photoIndex === photos.length-1) {
+							else if (photoIndex === length-1) {
                 setPhotoIndex(photoIndex-1)
-              }
+              } 
 						}
 					},
 				},

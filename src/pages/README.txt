@@ -1,10 +1,9 @@
 Values stored in the store include the following:
 
 - authToken (string)
-- currEntry (Entry)
+- currEntry (Entry) (see)
 - userId (string)
 - editMode (boolean)
-- username (string)
 
 Pages:
 

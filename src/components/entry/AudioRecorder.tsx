@@ -6,9 +6,9 @@
  * 2/26/2024
  */
 
-import { IonButton, IonFab, IonFabButton, IonIcon, IonRow } from "@ionic/react"
+import { IonButton, IonIcon, IonRow, useIonLoading } from "@ionic/react"
 import { VoiceRecorder } from "capacitor-voice-recorder"
-import { closeOutline, mic, pause, play, stop } from "ionicons/icons"
+import { closeOutline, mic, pause, stop } from "ionicons/icons"
 import { useEffect, useState } from "react"
 import ReactAudioPlayer from "react-audio-player"
 import './AudioRecorder.css'
@@ -22,6 +22,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ cancel, save}) => {
   const [recordingStatus, setRecordingStatus] = useState<string>('NONE')
   const [buttonIcon,  setButtonicon] = useState<string>('')
   const [recording, setRecording] = useState<HTMLAudioElement | undefined>()
+  const [presentLoading, dismissLoading] = useIonLoading()
 
   useEffect(() => {
     if (recordingStatus === 'NONE')
@@ -34,17 +35,26 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ cancel, save}) => {
   }, [recordingStatus])
 
   const startRecording = async () => {
-    if (await VoiceRecorder.hasAudioRecordingPermission()) {      
-      if (recordingStatus == 'NONE') {
-        VoiceRecorder.startRecording()
+    const permission = await VoiceRecorder.requestAudioRecordingPermission()
+    if (permission && recordingStatus === 'NONE') {    
+      try {
+        // presentLoading()
+        console.log('starting...')
+        setRecording(undefined)
+        await VoiceRecorder.startRecording()
         setRecordingStatus('RECORDING')
+        console.log('Recording!')
+      } catch (e) {
+        console.error(e)
+      } finally {
         // dismissLoading()
-      }    
+      }
     }
   }
   
   const resumeRecording = async () => {
     if (recordingStatus == 'PAUSED') {
+      console.log('resuming...')
       VoiceRecorder.resumeRecording()
       setRecordingStatus('RECORDING')
     }
@@ -52,6 +62,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ cancel, save}) => {
 
   const pauseRecording = async () => {
     if (recordingStatus == 'RECORDING') {
+      console.log('pausing...')
       VoiceRecorder.pauseRecording()
       setRecordingStatus('PAUSED')
     }
@@ -60,6 +71,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ cancel, save}) => {
   const stopRecording = async () => {
     const recording = await VoiceRecorder.stopRecording() // {"value": { recordDataBase64: string, msDuration: number, mimeType: string }}
     if (recording?.value?.recordDataBase64) {
+      console.log('stopping...')
       const base64Sound = recording.value.recordDataBase64
       const mimeType = recording.value.mimeType
       const audioRef = new Audio(`data:${mimeType};base64,${base64Sound}`)
@@ -92,53 +104,45 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ cancel, save}) => {
       {/* Recording button */}
       <IonRow id="recording-button">
         {
-          // If not recording,
+          // If not recording
           recordingStatus === 'NONE' ? 
             <IonButton onClick={startRecording} color="danger" shape={'circle' as any}>
               <IonIcon size="large" icon={buttonIcon} />
             </IonButton>
-          :
-            <IonButton onClick={stopRecording} color="danger" shape={'circle' as any}>
-              <IonIcon size="large" icon={stop} />
+          : recordingStatus === 'RECORDING' ?
+          // If recording, pause recording
+            <IonButton onClick={pauseRecording} color="danger" shape={'circle' as any}>
+              <IonIcon size="large" icon={pause} />
             </IonButton>
+          : recordingStatus === 'PAUSED' ?
+            // If paused, resume
+          <IonButton onClick={resumeRecording} color="danger" shape={'circle' as any}>
+            <IonIcon size="large" icon={mic} />
+          </IonButton>
+          : null
         }
       </IonRow>
 
-      {/* Pause and save button */}
+      {/* Pause or save button */}
       <IonRow id="pause-save-buttons">
         {
-          recording?.src || recordingStatus === 'RECORDING' ?
+          // Currently recording or paused, show "done" button
+          !recording?.src || recordingStatus !== 'NONE' ?
             <IonButton
-              color={recordingStatus === 'NONE' ? 'light' : 'primary'}
-              fill={
-                recordingStatus === 'NONE' ?
-                'outline' :
-                'solid'
-              }
-              onClick={
-                recordingStatus === 'RECORDING' ?
-                () => pauseRecording() :
-                () => resumeRecording()
-              }
+              onClick={stopRecording}
               disabled={recordingStatus === 'NONE'}
               shape={'circle' as any}
             >
-              <IonIcon 
-                size="large" 
-                icon={
-                recordingStatus === 'PAUSED' ?
-                mic :
-                pause
-              } 
-              />
+              Done
             </IonButton>
-          : null
-        }
-
-        {/* Save button */}
-        {
-          recording?.src ?
-            <IonButton onClick={() => save(recording)}>Save</IonButton>
+          // Not recording or paused, show "save" button
+          : recording?.src ?
+            <IonButton
+              onClick={() => save(recording)}
+              shape={'circle' as any}
+            >
+              Save
+            </IonButton>
           : null
         }
       </IonRow>
@@ -146,9 +150,9 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ cancel, save}) => {
       {/* Playback */}
       <IonRow id="playback">
         {
-          recording?.src ?
-          <ReactAudioPlayer src={recording?.src} controls /> :
-          null
+          recording?.src && recordingStatus === 'NONE' ?
+            <ReactAudioPlayer src={recording?.src} controls /> 
+          : <div id="hidden-audio-player"></div>
         }
       </IonRow>
     </div>

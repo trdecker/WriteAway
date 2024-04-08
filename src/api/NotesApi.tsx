@@ -5,6 +5,8 @@
  * Although the use case is slightly different (journal entries vs notes), the functionality is identical.
  * @author Tad Decker
  * 
+ * @todo Images and audio are being sent to back end, but not being saved. Make sure they're being sent in right way, then modify back end to accpet them.
+ * 
  * 11/11/2023: Created
  * 2/5/2025: Modified
  */
