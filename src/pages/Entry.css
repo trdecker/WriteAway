@@ -35,7 +35,10 @@
 }
 
 #audio-recording {
-  margin: 8px 0 12px 24px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  margin: 8px 0 12px 0;
   width: 100%;
 }
 
