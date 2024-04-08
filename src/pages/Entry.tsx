@@ -274,11 +274,9 @@ const NewNote: React.FC = () => {
             {
               recordings.map(recording =>
                 <IonRow id="audio-recording" key={recording.recording.src}>
-                  {
-                    window.innerWidth >= 400 ? // TODO: Make this play the audio!
-                      <ReactAudioPlayer src={recording.recording.src} controls />
-                    : <IonButton shape={"circle" as any}><IonIcon icon={play} /></IonButton>
-                  }
+                  {/* TODO: If screen is too small, display only a play button (OR a pop up window or shrink controls somehow?) */}
+                  <ReactAudioPlayer src={recording.recording.src} controls />
+                  {/* <IonButton shape={"circle" as any}><IonIcon icon={play} /></IonButton> */}
                   <IonButton
                     id="delete-recording-button"
                     color="danger"
