@@ -66,7 +66,7 @@ const Login: React.FC = () => {
 			await presentLoading()
 			const response = await signup(username, password)
 			if (response) {
-				await store.set('username', response.username)
+				// await store.set('username', response.username) // Never actually used
 				await store.set('userId', response.userId)
 				await store.set('authToken', response.token)
 	
