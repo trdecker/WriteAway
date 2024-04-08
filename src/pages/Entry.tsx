@@ -96,6 +96,11 @@ const NewNote: React.FC = () => {
     getCurrEntry()
   }, [reload])
 
+  /**
+   * @function
+   * @description In some future date, adding the ability for users to create new tags would be super cool.
+   * @deprecated
+   */
   const handleSaveTag = () => {
     if (newTag) {
       let tags = userTags
@@ -226,9 +231,12 @@ const NewNote: React.FC = () => {
               ))}
             </IonSelect>
             {/* Delete Entry Button */}
-            <IonFabButton onClick={() => setMarkedDelete(true)} color="danger">
-              <IonIcon icon={trash} size="large" />
-            </IonFabButton>
+            <IonRow id="delete-entry">
+              <IonButton onClick={() => setMarkedDelete(true)} color="danger">
+                <IonIcon icon={trash} size="large" />
+                <IonText>&nbsp;&nbsp;Delete Entry</IonText>
+              </IonButton>
+            </IonRow>
           </IonContent>
         </IonMenu>
 
